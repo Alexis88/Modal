@@ -1,2 +1,2 @@
 # Modal
-Ventana modal personalizada
+Genera una ventana modal personalizada
