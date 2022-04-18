@@ -1,13 +1,3 @@
-/*
- * Ventana modal
- *
- * Este script genera una ventana modal con un fondo negro y un botón para cerrarla
- *
- * @author    Alexis López Espinoza
- * @version   1.0
- * @param     {data}          Mixed          La información a mostrar en la ventana modal
- */
-
 "use strict";
 
 let Modal = {
@@ -55,6 +45,7 @@ let Modal = {
 		Modal.mensaje.style.margin = "0 auto";
 		Modal.mensaje.style.marginTop = "1rem";
 		Modal.mensaje.style.textAlign = "center";
+		Modal.mensaje.style.color = "#1a1a1a";
 		Modal.mensaje.textContent = "Pulse el fondo oscuro o la X para cerrar la ventana";
 
 		//Botón para cerrar la ventana modal
