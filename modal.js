@@ -4,9 +4,10 @@ let Modal = {
 	show: (data) => {
 		//El fondo
 		Modal.back = document.createElement("div");
+		Modal.back.classList.add("modalBack");
 		Modal.back.style.width = window.innerWidth + "px";
 		Modal.back.style.height = window.innerHeight + "px";
-		Modal.back.style.backgroundColor = "black";
+		Modal.back.style.backgroundColor = "#708090";
 		Modal.back.style.top = 0;
 		Modal.back.style.left = 0;
 		Modal.back.style.margin = 0;
@@ -15,8 +16,8 @@ let Modal = {
 		Modal.back.style.alignItems = "center";
 		Modal.back.style.justifyContent = "center";
 		Modal.back.style.opacity = 0;
-		Modal.back.style.transition = "all ease .15s";
-		Modal.back.style.zIndex = "8888 !important";
+		Modal.back.style.zIndex = "9999";
+		Modal.back.style.transition = "all ease .15s";		
 
 		//Cuadro que mostrará el texto y/o imágenes
 		Modal.front = document.createElement("div");
@@ -24,32 +25,22 @@ let Modal = {
 		Modal.front.style.maxWidth = window.innerWidth * .75 + "px";
 		Modal.front.style.minHeight = window.innerHeight * .45 + "px";
 		Modal.front.style.maxHeight = window.innerHeight * .85 + "px";
-		Modal.front.style.display = "flex";
-		Modal.front.style.alignItems = "center";
-		Modal.front.style.justifyContent = "center";
-		Modal.front.style.flexDirection = "column";
+		Modal.front.style.display = "block";
+		Modal.front.style.margin = "0 auto";
+		Modal.front.style.textAlign = "center";
 		Modal.front.style.backgroundColor = "snow";
 		Modal.front.style.paddingTop = "1%";
 		Modal.front.style.paddingBottom = "1%";
 		Modal.front.style.paddingRight = "2.5%";
 		Modal.front.style.paddingLeft = "2.5%";
 		Modal.front.style.transition = "all ease .15s";
-		Modal.front.style.zIndex = "9999 !important";
 		Modal.front.style.overflow = "auto";
 		Modal.front.style.wordWrap = "break-word";
 		Modal.front.innerHTML = data;
 
-		//Mensaje que indica al usuario cómo cerrar la ventana modal
-		Modal.mensaje = document.createElement("b");
-		Modal.mensaje.style.display = "block";
-		Modal.mensaje.style.margin = "0 auto";
-		Modal.mensaje.style.marginTop = "1rem";
-		Modal.mensaje.style.textAlign = "center";
-		Modal.mensaje.style.color = "#1a1a1a";
-		Modal.mensaje.textContent = "Pulse el fondo oscuro o la X para cerrar la ventana";
-
 		//Botón para cerrar la ventana modal
 		Modal.close = document.createElement("b");
+		Modal.close.classList.add("modalClose");
 		Modal.close.style.position = "fixed";
 		Modal.close.style.top = ".5rem";
 		Modal.close.style.right = "1.25rem";
@@ -62,9 +53,6 @@ let Modal = {
 		Modal.close.title = "Cerrar esta ventana";
 		Modal.close.addEventListener("mouseover", _ => Modal.close.style.transform = "scale(1.2)", false);
 		Modal.close.addEventListener("mouseout", _ => Modal.close.style.transform = "scale(1)", false);
-
-		//Se adhiere el mensaje al cuadro
-		Modal.front.appendChild(Modal.mensaje);
 
 		//Se adhiere el botón para cerrar la ventana modal
 		Modal.back.appendChild(Modal.close);
@@ -83,12 +71,20 @@ let Modal = {
 		//Se retiran las barras de desplazamiento del documento
 		document.body.style.overflow = "hidden";
 
-		//Se cierra la ventana modal al pulsar el fondo oscuro
+		//Se cierra la ventana modal al pulsar el fondo oscuro o la X
 		document.addEventListener("click", (e) => {
-			if (e.target == Modal.back || e.target == Modal.close){
-				Modal.hide();
-				e.stopImmediatePropagation();
+			let elem = e.target, modal;
+
+			//Si se pulsa en el fondo
+			if (elem.classList.contains("modalBack")){
+				Modal.hide(elem);
 			}
+
+			if (elem.classList.contains("modalClose")){
+				Modal.hide(elem.parentNode);
+			}
+
+			e.stopImmediatePropagation();
 		}, false);
 
 		//Al girar el dispositivo, cambian las dimensiones del fondo
@@ -96,15 +92,18 @@ let Modal = {
 		window.addEventListener("resize", Modal.resize, false);
 	},
 
-	hide: () => {
+	hide: (modal) => {
 		//Se desvanecen el fondo y su contenido
-		Modal.back.style.opacity = 0;
+		modal.style.opacity = 0;
 
 		//Luego de 200 milésimas de segundo, se eliminan el fondo y su contenido, se devuelve al documento sus barras de desplazamiento y el valor del comodín vuelve a true
 		setTimeout(() => {
-			document.body.removeChild(Modal.back);
-			document.body.style.overflow = "auto";
-			Modal.flag = true;
+			document.body.removeChild(modal);
+
+			//Si ya no otras ventanas modales mostrándose, se restaura la barra de desplazamiento
+			if (!document.querySelectorAll(".modalBack")){
+				document.body.style.overflow = "auto";
+			}			
 		}, 200);
 	},
 
