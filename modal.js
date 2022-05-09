@@ -1,3 +1,17 @@
+/*
+ * VENTANA MODAL PERSONALIZADA
+ * 
+ * Este script genera una ventana modal en el que se puede mostrar contenido de cualquier tipo, sea texto plano, multimedia 
+ * o cargar el contenido de otra página.
+ * 
+ * MODO DE USO: Modal.show("El contenido");
+ * 
+ * 
+ * @author		Alexis López Espinoza
+ * @version		1.0
+ * @param		{data}		plain text		El contenido de la ventana modal
+ */
+
 "use strict";
 
 let Modal = {
@@ -51,8 +65,21 @@ let Modal = {
 		Modal.close.style.transition = "all ease .2s";
 		Modal.close.textContent = "X";
 		Modal.close.title = "Cerrar esta ventana";
-		Modal.close.addEventListener("mouseover", _ => Modal.close.style.transform = "scale(1.2)", false);
-		Modal.close.addEventListener("mouseout", _ => Modal.close.style.transform = "scale(1)", false);
+		
+		document.addEventListener("mouseover", (e) => {
+			let elem = e.target;
+
+			if (elem.classList.contains("modalClose")){
+				elem.style.transform = "scale(1.2)";
+			}
+		}, false);
+		document.addEventListener("mouseout", (e) => {
+			let elem = e.target;
+
+			if (elem.classList.contains("modalClose")){
+				elem.style.transform = "scale(1)";
+			}
+		}, false);
 
 		//Se adhiere el botón para cerrar la ventana modal
 		Modal.back.appendChild(Modal.close);
