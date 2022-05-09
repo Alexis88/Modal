@@ -110,8 +110,6 @@ let Modal = {
 			if (elem.classList.contains("modalClose")){
 				Modal.hide(elem.parentNode);
 			}
-
-			e.stopImmediatePropagation();
 		}, false);
 
 		//Al girar el dispositivo, cambian las dimensiones del fondo
