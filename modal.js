@@ -1,12 +1,13 @@
 /*
  * VENTANA MODAL PERSONALIZADA
  * 
- * Este script genera una ventana modal en el que se puede mostrar contenido de cualquier tipo, sea texto plano, multimedia 
- * o cargar el contenido de otra página.
+ * Este script genera una ventana modal en el que se puede mostrar contenido de cualquier tipo, sea texto 
+ * plano, multimedia o cargar el contenido de otra página.
  * 
- * MODO DE USO: Modal.show("El contenido");
+ *
+ * MODO DE USO: Modal.show("El contenido"); 
  * 
- * 
+ *
  * @author		Alexis López Espinoza
  * @version		1.0
  * @param		{data}		plain text		El contenido de la ventana modal
@@ -21,7 +22,7 @@ let Modal = {
 		Modal.back.classList.add("modalBack");
 		Modal.back.style.width = window.innerWidth + "px";
 		Modal.back.style.height = window.innerHeight + "px";
-		Modal.back.style.backgroundColor = "#708090";
+		Modal.back.style.backgroundColor = "black";
 		Modal.back.style.top = 0;
 		Modal.back.style.left = 0;
 		Modal.back.style.margin = 0;
@@ -123,10 +124,12 @@ let Modal = {
 
 		//Luego de 200 milésimas de segundo, se eliminan el fondo y su contenido, se devuelve al documento sus barras de desplazamiento y el valor del comodín vuelve a true
 		setTimeout(() => {
-			document.body.removeChild(modal);
+			if (modal.parentNode == document.body){
+				document.body.removeChild(modal);
+			}
 
 			//Si ya no otras ventanas modales mostrándose, se restaura la barra de desplazamiento
-			if (!document.querySelectorAll(".modalBack")){
+			if (!document.querySelectorAll(".modalBack").length){
 				document.body.style.overflow = "auto";
 			}			
 		}, 200);
