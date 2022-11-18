@@ -16,7 +16,7 @@
 "use strict";
 
 let Modal = {
-	show: (data) => {
+	show: (data, url, query) => {
 		//El fondo
 		Modal.back = document.createElement("div");
 		Modal.back.classList.add("modalBack");
@@ -66,20 +66,39 @@ let Modal = {
 		Modal.close.style.transition = "all ease .2s";
 		Modal.close.textContent = "X";
 		Modal.close.title = "Cerrar esta ventana";
+
+		//La URL de consulta
+		if (url && url.length){
+			//La cadena de consulta
+			if (query && query.length){
+				Modal.getContent(url, query);
+			}
+			else{
+				Modal.getContent(url);
+			}
+		}
+
+		//Clases de elementos
+		Modal.clases = ["modalClose", "arrow"];
 		
 		document.addEventListener("mouseover", (e) => {
 			let elem = e.target;
 
-			if (elem.classList.contains("modalClose")){
-				elem.style.transform = "scale(1.2)";
-			}
+			Modal.clases.some(clase => {
+				if (elem.classList.contains(clase)){
+					elem.style.transform = "scale(1.2)";
+				}
+			});
 		}, false);
+
 		document.addEventListener("mouseout", (e) => {
 			let elem = e.target;
 
-			if (elem.classList.contains("modalClose")){
-				elem.style.transform = "scale(1)";
-			}
+			Modal.clases.some(clase => {
+				if (elem.classList.contains(clase)){
+					elem.style.transform = "scale(1)";
+				}
+			});
 		}, false);
 
 		//Se adhiere el botón para cerrar la ventana modal
@@ -143,5 +162,71 @@ let Modal = {
 		Modal.front.style.minHeight = window.innerHeight * .45 + "px";
 		Modal.front.style.maxHeight = window.innerHeight * .85 + "px";
 		Modal.back.style.top = 0;
+	},
+
+	getContent: (url, query) => {
+		Ajax({
+			url: url,
+			data: {
+				id: query
+			},
+			type: "json"
+		}).done(response => {
+			if (response.length){
+				let content = response,
+					count = 0,
+					total = content.length;
+
+				if (total > 1){
+					let left = Modal.arrow("left", "<<", "Anterior"),
+						right = Modal.arrow("right", ">>", "Siguiente");
+
+					Modal.back.appendChild(left);
+					Modal.back.appendChild(right);
+
+					document.addEventListener("click", e => {
+						let elem = e.target;
+
+						if (elem.classList.contains("arrow")){
+							if (elem.classList.contains("left")){
+								count = count - 1 < 0 ? total - 1 : count - 1;
+								Modal.change("<img src='" + content[count] + "' class='mediaModal' />");
+							}
+
+							if (elem.classList.contains("right")){
+								count = count + 1 == total ? 0 : count + 1;
+								Modal.change("<img src='" + content[count] + "' class='mediaModal' />");
+							}
+						}
+					}, false);
+				}
+			}
+		}).fail(error => Notification.msg(error));
+	},
+
+	change: elem => {
+		Modal.front.querySelector("img").style.opacity = "0";
+
+		setTimeout(_ => {
+			Modal.front.innerHTML = elem;
+		}, 150);
+	},
+
+	arrow: (dir, txt, title) => {
+		let btn = document.createElement("span");
+
+		btn.style.position = "fixed";
+		btn.style.top = "50%";
+		btn.style[dir] = "1.5%";
+		btn.style.cursor = "pointer";
+		btn.style.color = "white";
+		btn.style.fontWeight = "bold";
+		btn.style.fontSize = "1.5rem";
+		btn.style.userSelect = "none";		
+		btn.classList.add("arrow", dir);
+		btn.title = title;
+		btn.textContent = txt;
+
+		return btn;
 	}
 };
