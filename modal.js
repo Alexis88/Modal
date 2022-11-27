@@ -190,12 +190,12 @@ let Modal = {
 						if (elem.classList.contains("arrow")){
 							if (elem.classList.contains("left")){
 								count = count - 1 < 0 ? total - 1 : count - 1;
-								Modal.change("<img src='" + content[count] + "' class='mediaModal' />");
+								Modal.change("<img src='" + content[count] + "' style='max-width: 65vh; max-height: 75vh;' />");
 							}
 
 							if (elem.classList.contains("right")){
 								count = count + 1 == total ? 0 : count + 1;
-								Modal.change("<img src='" + content[count] + "' class='mediaModal' />");
+								Modal.change("<img src='" + content[count] + "' style='max-width: 65vh; max-height: 75vh;' />");
 							}
 						}
 					}, false);
