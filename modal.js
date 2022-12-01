@@ -111,9 +111,7 @@ let Modal = {
 		document.body.appendChild(Modal.back);
 
 		//Se da visibilidad al fondo y cuadro
-		setTimeout(() => {
-			Modal.back.style.opacity = .975;
-		}, 100);
+		setTimeout(_ => Modal.back.style.opacity = .975, 100);
 
 		//Se retiran las barras de desplazamiento del documento
 		document.body.style.overflow = "hidden";
@@ -165,21 +163,34 @@ let Modal = {
 	},
 
 	getContent: (url, query) => {
-		Ajax({
-			url: url,
-			data: {
-				id: query
-			},
-			type: "json"
-		}).done(response => {
-			if (response.length){
+		let options;
+
+		if (query){
+			options = {
+				url: url,
+				data: {
+					id: query
+				},
+				type: "json"
+			};
+		}
+		else{
+			options = {url: url};
+		}
+
+		Ajax(options).done(response => {
+			if ("type" in options && response.length){
 				let content = response,
 					count = 0,
 					total = content.length;
 
 				if (total > 1){
 					let left = Modal.arrow("left", "<<", "Anterior"),
-						right = Modal.arrow("right", ">>", "Siguiente");
+						right = Modal.arrow("right", ">>", "Siguiente"),
+						img = document.createElement("img");
+					
+					img.style.maxWidth = "65vh";
+					img.style.maxHeight = "75vh";
 
 					Modal.back.appendChild(left);
 					Modal.back.appendChild(right);
@@ -190,25 +201,32 @@ let Modal = {
 						if (elem.classList.contains("arrow")){
 							if (elem.classList.contains("left")){
 								count = count - 1 < 0 ? total - 1 : count - 1;
-								Modal.change("<img src='" + content[count] + "' style='max-width: 65vh; max-height: 75vh;' />");
+								img.src = content[count];
+								Modal.change(img);
 							}
 
 							if (elem.classList.contains("right")){
 								count = count + 1 == total ? 0 : count + 1;
-								Modal.change("<img src='" + content[count] + "' style='max-width: 65vh; max-height: 75vh;' />");
+								img.src = content[count];
+								Modal.change(img);
 							}
 						}
 					}, false);
-				}
+				}				
+			}
+			else{
+				Modal.front.innerHTML = response;
 			}
 		}).fail(error => Notification.msg(error));
 	},
 
 	change: elem => {
-		Modal.front.querySelector("img").style.opacity = "0";
+		let img = Modal.front.querySelector("img");
+
+		img && img.remove();
 
 		setTimeout(_ => {
-			Modal.front.innerHTML = elem;
+			Modal.front.appendChild(elem);
 		}, 150);
 	},
 
