@@ -52,11 +52,6 @@ let Modal = {
 		Modal.front.style.wordWrap = "break-word";
 		Modal.front.innerHTML = data;
 
-		//Si se ha especificado un bloque frontal personalizado
-		if (newFront){
-			Modal.front = newFront;
-		}
-
 		//Botón para cerrar la ventana modal
 		Modal.close = document.createElement("b");
 		Modal.close.classList.add("modalClose");
@@ -109,11 +104,11 @@ let Modal = {
 		Modal.back.appendChild(Modal.close);
 
 		//Se adhiere el cuadro al fondo
-		if (Modal.front instanceof Element){
-			Modal.back.appendChild(Modal.front);
+		if (newFront){
+			Modal.back.insertAdjacentHTML("beforeend", newFront);			
 		}
 		else{
-			Modal.back.innerHTML += Modal.front;
+			Modal.back.appendChild(Modal.front);
 		}
 
 		//Se adhiere el fondo al documento
@@ -194,12 +189,12 @@ let Modal = {
 			if ("type" in options && response.length){
 				let content = response,
 					count = 0,
-					total = content.length;
+					total = content.length,
+					img = document.querySelector(".modalClose").nextElementSibling;
 
 				if (total > 1){
 					let left = Modal.arrow("left", "<<", "Anterior"),
-						right = Modal.arrow("right", ">>", "Siguiente"),
-						img = document.createElement("img");
+						right = Modal.arrow("right", ">>", "Siguiente");
 
 					Modal.back.appendChild(left);
 					Modal.back.appendChild(right);
@@ -211,15 +206,14 @@ let Modal = {
 							if (elem.classList.contains("left")){
 								count = count - 1 < 0 ? total - 1 : count - 1;
 								img.src = content[count];
-								Modal.change(img);
 							}
 
 							if (elem.classList.contains("right")){
 								count = count + 1 == total ? 0 : count + 1;
 								img.src = content[count];
-								Modal.change(img);
 							}
 						}
+
 					}, false);
 				}				
 			}
@@ -227,16 +221,6 @@ let Modal = {
 				Modal.front.innerHTML = response;
 			}
 		}).fail(error => Notification.msg(error));
-	},
-
-	change: elem => {
-		let img = Modal.front.querySelector("img");
-
-		img && img.remove();
-
-		setTimeout(_ => {
-			Modal.front.appendChild(elem);
-		}, 150);
 	},
 
 	arrow: (dir, txt, title) => {
