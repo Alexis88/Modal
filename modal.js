@@ -16,13 +16,13 @@
 "use strict";
 
 let Modal = {
-	show: (data, url, query) => {
+	show: (data, url, query, newFront) => {
 		//El fondo
 		Modal.back = document.createElement("div");
 		Modal.back.classList.add("modalBack");
 		Modal.back.style.width = window.innerWidth + "px";
 		Modal.back.style.height = window.innerHeight + "px";
-		Modal.back.style.backgroundColor = "black";
+		Modal.back.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
 		Modal.back.style.top = 0;
 		Modal.back.style.left = 0;
 		Modal.back.style.margin = 0;
@@ -30,7 +30,6 @@ let Modal = {
 		Modal.back.style.display = "flex";
 		Modal.back.style.alignItems = "center";
 		Modal.back.style.justifyContent = "center";
-		Modal.back.style.opacity = 0;
 		Modal.back.style.zIndex = "9999";
 		Modal.back.style.transition = "all ease .15s";		
 
@@ -43,15 +42,20 @@ let Modal = {
 		Modal.front.style.display = "block";
 		Modal.front.style.margin = "0 auto";
 		Modal.front.style.textAlign = "center";
+		Modal.front.style.overflow = "auto";
 		Modal.front.style.backgroundColor = "snow";
 		Modal.front.style.paddingTop = "1%";
 		Modal.front.style.paddingBottom = "1%";
 		Modal.front.style.paddingRight = "2.5%";
 		Modal.front.style.paddingLeft = "2.5%";
 		Modal.front.style.transition = "all ease .15s";
-		Modal.front.style.overflow = "auto";
 		Modal.front.style.wordWrap = "break-word";
 		Modal.front.innerHTML = data;
+
+		//Si se ha especificado un bloque frontal personalizado
+		if (newFront){
+			Modal.front = newFront;
+		}
 
 		//Botón para cerrar la ventana modal
 		Modal.close = document.createElement("b");
@@ -105,16 +109,21 @@ let Modal = {
 		Modal.back.appendChild(Modal.close);
 
 		//Se adhiere el cuadro al fondo
-		Modal.back.appendChild(Modal.front);
+		if (Modal.front instanceof Element){
+			Modal.back.appendChild(Modal.front);
+		}
+		else{
+			Modal.back.innerHTML += Modal.front;
+		}
 
 		//Se adhiere el fondo al documento
 		document.body.appendChild(Modal.back);
 
-		//Se da visibilidad al fondo y cuadro
-		setTimeout(_ => Modal.back.style.opacity = .975, 100);
-
 		//Se retiran las barras de desplazamiento del documento
 		document.body.style.overflow = "hidden";
+
+		//Si el bloque frontal es personalizado, se redimensiona
+		if (!(Modal.front instanceof Element)) Modal.resize();
 
 		//Se cierra la ventana modal al pulsar el fondo oscuro o la X
 		document.addEventListener("click", (e) => {
@@ -135,7 +144,7 @@ let Modal = {
 		window.addEventListener("resize", Modal.resize, false);
 	},
 
-	hide: (modal) => {
+	hide: modal => {
 		//Se desvanecen el fondo y su contenido
 		modal.style.opacity = 0;
 
@@ -147,19 +156,22 @@ let Modal = {
 
 			//Si ya no otras ventanas modales mostrándose, se restaura la barra de desplazamiento
 			if (!document.querySelectorAll(".modalBack").length){
-				document.body.style.overflow = "auto";
+				document.body.style.overflowY = "auto";
 			}			
 		}, 200);
 	},
 
-	resize: () => {
+	resize: _ => {
 		Modal.back.style.width = window.innerWidth + "px";
 		Modal.back.style.height = window.innerHeight + "px";
-		Modal.front.style.minWidth = window.innerWidth * .35 + "px";
-		Modal.front.style.maxWidth = window.innerWidth * .75 + "px";
-		Modal.front.style.minHeight = window.innerHeight * .45 + "px";
-		Modal.front.style.maxHeight = window.innerHeight * .85 + "px";
 		Modal.back.style.top = 0;
+		
+		let front = Modal.back.querySelector("b").nextElementSibling;
+		
+		front.style.minWidth = window.innerWidth * .35 + "px";
+		front.style.maxWidth = window.innerWidth * .75 + "px";
+		front.style.minHeight = window.innerHeight * .45 + "px";
+		front.style.maxHeight = window.innerHeight * .85 + "px";		
 	},
 
 	getContent: (url, query) => {
@@ -188,9 +200,6 @@ let Modal = {
 					let left = Modal.arrow("left", "<<", "Anterior"),
 						right = Modal.arrow("right", ">>", "Siguiente"),
 						img = document.createElement("img");
-					
-					img.style.maxWidth = "65vh";
-					img.style.maxHeight = "75vh";
 
 					Modal.back.appendChild(left);
 					Modal.back.appendChild(right);
