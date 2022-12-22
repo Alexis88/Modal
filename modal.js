@@ -118,7 +118,7 @@ let Modal = {
 		document.body.style.overflow = "hidden";
 
 		//Si el bloque frontal es personalizado, se redimensiona
-		if (!(Modal.front instanceof Element)) Modal.resize();
+		if (newFront) Modal.resize();
 
 		//Se cierra la ventana modal al pulsar el fondo oscuro o la X
 		document.addEventListener("click", (e) => {
