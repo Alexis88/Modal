@@ -16,7 +16,7 @@
 "use strict";
 
 let Modal = {
-	show: (data, url, query, newFront) => {
+	show: (data, url, query, newFront, callback) => {
 		//El fondo
 		Modal.back = document.createElement("div");
 		Modal.back.classList.add("modalBack");
@@ -26,11 +26,11 @@ let Modal = {
 		Modal.back.style.top = 0;
 		Modal.back.style.left = 0;
 		Modal.back.style.margin = 0;
-		Modal.back.style.position = "fixed";		
+		Modal.back.style.position = "absolute";		
 		Modal.back.style.display = "flex";
 		Modal.back.style.alignItems = "center";
 		Modal.back.style.justifyContent = "center";
-		Modal.back.style.zIndex = "9999";
+		Modal.back.style.zIndex = "8888";
 		Modal.back.style.transition = "all ease .15s";		
 
 		//Cuadro que mostrará el texto y/o imágenes
@@ -76,6 +76,8 @@ let Modal = {
 				Modal.getContent(url);
 			}
 		}
+
+		Modal.callback = callback && {}.toString.call(callback) == "[object Function]" ? callback : false;
 
 		//Clases de elementos
 		Modal.clases = ["modalClose", "arrow"];
@@ -219,6 +221,7 @@ let Modal = {
 			}
 			else{
 				Modal.front.innerHTML = response;
+				Modal.callback && Modal.callback();
 			}
 		}).fail(error => Notification.msg(error));
 	},
