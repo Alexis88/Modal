@@ -3,6 +3,9 @@
  * 
  * Este script genera una ventana modal en el que se puede mostrar contenido de cualquier tipo, sea texto 
  * plano, multimedia o cargar el contenido de otra página.
+ *
+ * Se emplearon los archivos ajax.js y notification.js, listados en el repositorio.
+ * Pueden ser encontrados aquí: https://github.com/Alexis88?tab=repositories
  * 
  *
  * MODO DE USO: Modal.show("El contenido"); 
@@ -22,7 +25,7 @@ let Modal = {
 		Modal.back.classList.add("modalBack");
 		Modal.back.style.width = window.innerWidth + "px";
 		Modal.back.style.height = window.innerHeight + "px";
-		Modal.back.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
+		Modal.back.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
 		Modal.back.style.top = 0;
 		Modal.back.style.left = 0;
 		Modal.back.style.margin = 0;
@@ -35,7 +38,8 @@ let Modal = {
 
 		//Cuadro que mostrará el texto y/o imágenes
 		Modal.front = document.createElement("div");
-		Modal.front.style.minWidth = window.innerWidth * .35 + "px";
+		Modal.back.classList.add("modalFront");
+		Modal.front.style.minWidth = window.innerWidth * .5 + "px";
 		Modal.front.style.maxWidth = window.innerWidth * .75 + "px";
 		Modal.front.style.minHeight = window.innerHeight * .45 + "px";
 		Modal.front.style.maxHeight = window.innerHeight * .85 + "px";
@@ -58,7 +62,7 @@ let Modal = {
 		Modal.close.style.position = "fixed";
 		Modal.close.style.top = ".5rem";
 		Modal.close.style.right = "1.25rem";
-		Modal.close.style.fontSize = "1.25rem";
+		Modal.close.style.fontSize = "1.85rem";
 		Modal.close.style.cursor = "pointer";
 		Modal.close.style.color = "#ffffff";
 		Modal.close.style.userSelect = "none";
@@ -127,14 +131,18 @@ let Modal = {
 			let elem = e.target, modal;
 
 			//Si se pulsa en el fondo
-			if (elem.classList.contains("modalBack")){
+			/*if (elem.classList.contains("modalBack")){
 				Modal.hide(elem);
-			}
+			}*/
 
+			//Si se pulsa en la X
 			if (elem.classList.contains("modalClose")){
 				Modal.hide(elem.parentNode);
 			}
 		}, false);
+
+		//Cuando se pulse la tecla ESC, se cerrará la ventana modal
+		document.addEventListener("keyup", e => e.which == 27 && Modal.hide(Modal.back), false);
 
 		//Al girar el dispositivo, cambian las dimensiones del fondo
 		window.addEventListener("orientationchange", Modal.resize, false);
@@ -146,7 +154,7 @@ let Modal = {
 		modal.style.opacity = 0;
 
 		//Luego de 200 milésimas de segundo, se eliminan el fondo y su contenido, se devuelve al documento sus barras de desplazamiento y el valor del comodín vuelve a true
-		setTimeout(() => {
+		setTimeout(_ => {
 			if (modal.parentNode == document.body){
 				document.body.removeChild(modal);
 			}
@@ -165,7 +173,7 @@ let Modal = {
 		
 		let front = Modal.back.querySelector("b").nextElementSibling;
 		
-		front.style.minWidth = window.innerWidth * .35 + "px";
+		front.style.minWidth = window.innerWidth * .5 + "px";
 		front.style.maxWidth = window.innerWidth * .75 + "px";
 		front.style.minHeight = window.innerHeight * .45 + "px";
 		front.style.maxHeight = window.innerHeight * .85 + "px";		
