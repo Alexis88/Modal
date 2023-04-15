@@ -86,7 +86,7 @@ let Modal = {
 		//Clases de elementos
 		Modal.clases = ["modalClose", "arrow"];
 		
-		document.addEventListener("mouseover", (e) => {
+		document.addEventListener("mouseover", e => {
 			let elem = e.target;
 
 			Modal.clases.some(clase => {
@@ -96,7 +96,7 @@ let Modal = {
 			});
 		}, false);
 
-		document.addEventListener("mouseout", (e) => {
+		document.addEventListener("mouseout", e => {
 			let elem = e.target;
 
 			Modal.clases.some(clase => {
@@ -127,7 +127,7 @@ let Modal = {
 		if (newFront) Modal.resize();
 
 		//Se cierra la ventana modal al pulsar el fondo oscuro o la X
-		document.addEventListener("click", (e) => {
+		document.addEventListener("click", e => {
 			let elem = e.target, modal;
 
 			//Si se pulsa en el fondo
