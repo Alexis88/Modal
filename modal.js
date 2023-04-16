@@ -26,7 +26,7 @@ let Modal = {
 		Modal.back.style.width = window.innerWidth + "px";
 		Modal.back.style.height = window.innerHeight + "px";
 		Modal.back.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-		Modal.back.style.top = 0;
+		Modal.back.style.top = (document.documentElement.scrollTop || document.body.scrollTop) + "px";
 		Modal.back.style.left = 0;
 		Modal.back.style.margin = 0;
 		Modal.back.style.position = "absolute";		
@@ -169,7 +169,7 @@ let Modal = {
 	resize: _ => {
 		Modal.back.style.width = window.innerWidth + "px";
 		Modal.back.style.height = window.innerHeight + "px";
-		Modal.back.style.top = 0;
+		Modal.back.style.top = (document.documentElement.scrollTop || document.body.scrollTop) + "px";
 		
 		let front = Modal.back.querySelector("b").nextElementSibling;
 		
