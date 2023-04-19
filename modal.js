@@ -244,7 +244,7 @@ let Modal = {
 		btn.style.color = "white";
 		btn.style.fontWeight = "bold";
 		btn.style.fontSize = "1.5rem";
-		btn.style.userSelect = "none";		
+		btn.style.userSelect = "none";
 		btn.classList.add("arrow", dir);
 		btn.title = title;
 		btn.textContent = txt;
