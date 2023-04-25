@@ -34,7 +34,18 @@ let Modal = {
 		Modal.back.style.alignItems = "center";
 		Modal.back.style.justifyContent = "center";
 		Modal.back.style.zIndex = "8888";
-		Modal.back.style.transition = "all ease .15s";		
+		Modal.back.style.transition = "all ease .15s";
+
+		//Animación para mostrar la ventana modal
+		Modal.back.animate([{
+			transform: "scale(0)",
+			opacity: 0
+		}, {
+			transform: "scale(1)",
+			opacity: 1
+		}], {
+			duration: 500
+		});
 
 		//Cuadro que mostrará el texto y/o imágenes
 		Modal.front = document.createElement("div");
@@ -150,20 +161,27 @@ let Modal = {
 	},
 
 	hide: modal => {
-		//Se desvanecen el fondo y su contenido
-		modal.style.opacity = 0;
+		//Se oculta la ventana modal
+		modal.animate([{
+			transform: "scale(1)",
+			opacity: 1
+		}, {
+			transform: "scale(0)",
+			opacity: 0
+		}], {
+			duration: 500
+		});
 
-		//Luego de 200 milésimas de segundo, se eliminan el fondo y su contenido, se devuelve al documento sus barras de desplazamiento y el valor del comodín vuelve a true
+		//Luego de 500 milésimas de segundo, se eliminan el fondo y su contenido, se devuelve al documento sus barras de desplazamiento y el valor del comodín vuelve a true
 		setTimeout(_ => {
-			if (modal.parentNode == document.body){
-				document.body.removeChild(modal);
-			}
+			//Si la ventana modal existe, se la elimina del documento
+			modal && modal.remove();
 
 			//Si ya no otras ventanas modales mostrándose, se restaura la barra de desplazamiento
 			if (!document.querySelectorAll(".modalBack").length){
 				document.body.style.overflowY = "auto";
 			}			
-		}, 200);
+		}, 500);
 	},
 
 	resize: _ => {
@@ -244,7 +262,7 @@ let Modal = {
 		btn.style.color = "white";
 		btn.style.fontWeight = "bold";
 		btn.style.fontSize = "1.5rem";
-		btn.style.userSelect = "none";
+		btn.style.userSelect = "none";		
 		btn.classList.add("arrow", dir);
 		btn.title = title;
 		btn.textContent = txt;
