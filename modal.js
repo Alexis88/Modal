@@ -44,7 +44,7 @@ let Modal = {
 			transform: "scale(1)",
 			opacity: 1
 		}], {
-			duration: 500
+			duration: 400
 		});
 
 		//Cuadro que mostrará el texto y/o imágenes
@@ -161,7 +161,7 @@ let Modal = {
 	},
 
 	hide: modal => {
-		//Se oculta la ventana modal
+		//Se oculta la ventana modal con un efecto de animación
 		modal.animate([{
 			transform: "scale(1)",
 			opacity: 1
@@ -169,10 +169,10 @@ let Modal = {
 			transform: "scale(0)",
 			opacity: 0
 		}], {
-			duration: 500
+			duration: 400
 		});
 
-		//Luego de 500 milésimas de segundo, se eliminan el fondo y su contenido, se devuelve al documento sus barras de desplazamiento y el valor del comodín vuelve a true
+		//Luego de 400 milésimas de segundo, se eliminan el fondo y su contenido, se devuelve al documento sus barras de desplazamiento y el valor del comodín vuelve a true
 		setTimeout(_ => {
 			//Si la ventana modal existe, se la elimina del documento
 			modal && modal.remove();
@@ -181,7 +181,7 @@ let Modal = {
 			if (!document.querySelectorAll(".modalBack").length){
 				document.body.style.overflowY = "auto";
 			}			
-		}, 500);
+		}, 400);
 	},
 
 	resize: _ => {
