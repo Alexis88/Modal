@@ -171,6 +171,9 @@ let Modal = {
 		}], {
 			duration: 400
 		});
+		
+		//Se oculta la ventana modal del todo (para evitar el problema del parpadeo)
+		modal.style.opacity = 0;
 
 		//Luego de 400 milésimas de segundo, se eliminan el fondo y su contenido, se devuelve al documento sus barras de desplazamiento y el valor del comodín vuelve a true
 		setTimeout(_ => {
