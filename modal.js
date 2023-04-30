@@ -13,13 +13,27 @@
  *
  * @author		Alexis López Espinoza
  * @version		1.0
- * @param		{data}		plain text		El contenido de la ventana modal
+ * @param		data		String/Plain text	El contenido de la ventana modal
+ * @param		url 		String 				La URL de la cual se obtendrá el contenido
+ * @param		query 		String 				Cadena de consulta para adjuntar a la URL
+ * @param		newFront 	Plain text 			Cuadro que se mostrará en lugar de la ventana modal
+ * @param		callback	Function			Llamada de retorno a ejecutarse al cerrarse la ventana modal
+ * @param		alignment	String 				Alineación del contenido
+ * @param		borders 	String 				Estilo de bordes de la ventana modal
  */
 
 "use strict";
 
 let Modal = {
-	show: (data, url, query, newFront, callback) => {
+	show: (
+		data, //El contenido plano a mostrarse
+		url,  //URL de la cual se obtendrá el contenido
+		query, //Cadena de consulta para adjuntar a la URL
+		newFront, //Cuadro que se mostrará en lugar de la ventana modal
+		callback, //Llamada de retorno a ejecutarse al cerrarse la ventana modal
+		alignment, //Alineación del contenido
+		borders //Estilo de bordes de la ventana modal
+	) => {
 		//El fondo
 		Modal.back = document.createElement("div");
 		Modal.back.classList.add("modalBack");
@@ -56,13 +70,14 @@ let Modal = {
 		Modal.front.style.maxHeight = window.innerHeight * .85 + "px";
 		Modal.front.style.display = "block";
 		Modal.front.style.margin = "0 auto";
-		Modal.front.style.textAlign = "center";
+		Modal.front.style.textAlign = alignment || "center";
 		Modal.front.style.overflow = "auto";
 		Modal.front.style.backgroundColor = "snow";
 		Modal.front.style.paddingTop = "1%";
 		Modal.front.style.paddingBottom = "1%";
 		Modal.front.style.paddingRight = "2.5%";
 		Modal.front.style.paddingLeft = "2.5%";
+		Modal.front.style.borderRadius = borders || 0;
 		Modal.front.style.transition = "all ease .15s";
 		Modal.front.style.wordWrap = "break-word";
 		Modal.front.innerHTML = data;
@@ -171,7 +186,7 @@ let Modal = {
 		}], {
 			duration: 400
 		});
-		
+
 		//Se oculta la ventana modal del todo (para evitar el problema del parpadeo)
 		modal.style.opacity = 0;
 
