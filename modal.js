@@ -39,7 +39,7 @@ let Modal = {
 		Modal.back.classList.add("modalBack");
 		Modal.back.style.width = window.innerWidth + "px";
 		Modal.back.style.height = window.innerHeight + "px";
-		Modal.back.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+		Modal.back.style.backgroundColor = "rgba(0, 0, 0, 0.6)";
 		Modal.back.style.top = (document.documentElement.scrollTop || document.body.scrollTop) + "px";
 		Modal.back.style.left = 0;
 		Modal.back.style.margin = 0;
@@ -68,7 +68,9 @@ let Modal = {
 		Modal.front.style.maxWidth = window.innerWidth * .75 + "px";
 		Modal.front.style.minHeight = window.innerHeight * .45 + "px";
 		Modal.front.style.maxHeight = window.innerHeight * .85 + "px";
-		Modal.front.style.display = "block";
+		Modal.front.style.display = "flex !important";
+		Modal.front.style.alignItems = "center !important";
+		Modal.front.style.justifyContent = "center !important";
 		Modal.front.style.margin = "0 auto";
 		Modal.front.style.textAlign = alignment || "center";
 		Modal.front.style.overflow = "auto";
@@ -212,7 +214,7 @@ let Modal = {
 		front.style.minWidth = window.innerWidth * .5 + "px";
 		front.style.maxWidth = window.innerWidth * .75 + "px";
 		front.style.minHeight = window.innerHeight * .45 + "px";
-		front.style.maxHeight = window.innerHeight * .85 + "px";		
+		front.style.maxHeight = window.innerHeight * .95 + "px";		
 	},
 
 	getContent: (url, query) => {
