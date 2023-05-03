@@ -20,6 +20,7 @@
  * @param		callback	Function			Llamada de retorno a ejecutarse al cerrarse la ventana modal
  * @param		alignment	String 				Alineación del contenido
  * @param		borders 	String 				Estilo de bordes de la ventana modal
+ * @param		time 		Number 				Duración de la animación para mostrar y ocultar la ventana modal
  */
 
 "use strict";
@@ -32,7 +33,8 @@ let Modal = {
 		newFront, //Cuadro que se mostrará en lugar de la ventana modal
 		callback, //Llamada de retorno a ejecutarse al cerrarse la ventana modal
 		alignment, //Alineación del contenido
-		borders //Estilo de bordes de la ventana modal
+		borders, //Estilo de bordes de la ventana modal
+		time //Duración de la animación para mostrar y ocultar la ventana modal
 	) => {
 		//El fondo
 		Modal.back = document.createElement("div");
@@ -50,6 +52,9 @@ let Modal = {
 		Modal.back.style.zIndex = "8888";
 		Modal.back.style.transition = "all ease .15s";
 
+		//Duración de la animación para mostrar y ocultar la ventana modal
+		Modal.animationTime = time || 400;
+
 		//Animación para mostrar la ventana modal
 		Modal.back.animate([{
 			transform: "scale(0)",
@@ -58,7 +63,7 @@ let Modal = {
 			transform: "scale(1)",
 			opacity: 1
 		}], {
-			duration: 400
+			duration: Modal.animationTime
 		});
 
 		//Cuadro que mostrará el texto y/o imágenes
@@ -186,13 +191,13 @@ let Modal = {
 			transform: "scale(0)",
 			opacity: 0
 		}], {
-			duration: 400
+			duration: Modal.animationTime
 		});
 
 		//Se oculta la ventana modal del todo (para evitar el problema del parpadeo)
 		modal.style.opacity = 0;
 
-		//Luego de 400 milésimas de segundo, se eliminan el fondo y su contenido, se devuelve al documento sus barras de desplazamiento y el valor del comodín vuelve a true
+		//Terminado el tiempo de animación se eliminan el fondo y su contenido, se devuelve al documento sus barras de desplazamiento y el valor del comodín vuelve a true
 		setTimeout(_ => {
 			//Si la ventana modal existe, se la elimina del documento
 			modal && modal.remove();
@@ -201,8 +206,10 @@ let Modal = {
 			if (!document.querySelectorAll(".modalBack").length){
 				document.body.style.overflowY = "auto";
 			}			
-		}, 400);
+		}, Modal.animationTime);
 	},
+
+	hideAll: _ => [...document.querySelectorAll(".modalBack")].forEach(modal => Modal.hide(modal)),
 
 	resize: _ => {
 		Modal.back.style.width = window.innerWidth + "px";
