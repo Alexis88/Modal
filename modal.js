@@ -95,7 +95,7 @@ let Modal = {
 		Modal.close.style.position = "fixed";
 		Modal.close.style.fontSize = "1.5rem";
 		Modal.close.style.cursor = "pointer";
-		Modal.close.style.color = "#000";
+		Modal.close.style.color = "#304145";
 		Modal.close.style.userSelect = "none";
 		Modal.close.style.transition = "all ease .2s";
 		Modal.close.textContent = "❌";
@@ -225,8 +225,8 @@ let Modal = {
 		Modal.close.style.opacity = 0;
 
 		setTimeout(_ => {
-			Modal.close.style.top = front.getBoundingClientRect().top + "px";
-			Modal.close.style.left = (front.getBoundingClientRect().right - Modal.close.getBoundingClientRect().width * 1.5) + "px";
+			Modal.close.style.top = front.getBoundingClientRect().top * 1.05 + "px";
+			Modal.close.style.left = (front.getBoundingClientRect().right - Modal.close.getBoundingClientRect().width * 1.55) + "px";
 			Modal.close.style.opacity = 1;
 		}, Modal.animationTime);
 	},
