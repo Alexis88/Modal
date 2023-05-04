@@ -68,7 +68,7 @@ let Modal = {
 
 		//Cuadro que mostrará el texto y/o imágenes
 		Modal.front = document.createElement("div");
-		Modal.back.classList.add("modalFront");
+		Modal.front.classList.add("modalFront");
 		Modal.front.style.minWidth = window.innerWidth * .5 + "px";
 		Modal.front.style.maxWidth = window.innerWidth * .75 + "px";
 		Modal.front.style.minHeight = window.innerHeight * .45 + "px";
@@ -93,14 +93,12 @@ let Modal = {
 		Modal.close = document.createElement("b");
 		Modal.close.classList.add("modalClose");
 		Modal.close.style.position = "fixed";
-		Modal.close.style.top = ".5rem";
-		Modal.close.style.right = "1.25rem";
-		Modal.close.style.fontSize = "1.85rem";
+		Modal.close.style.fontSize = "1.5rem";
 		Modal.close.style.cursor = "pointer";
-		Modal.close.style.color = "#ffffff";
+		Modal.close.style.color = "#000";
 		Modal.close.style.userSelect = "none";
 		Modal.close.style.transition = "all ease .2s";
-		Modal.close.textContent = "X";
+		Modal.close.textContent = "❌";
 		Modal.close.title = "Cerrar esta ventana";
 
 		//La URL de consulta
@@ -144,7 +142,8 @@ let Modal = {
 
 		//Se adhiere el cuadro al fondo
 		if (newFront){
-			Modal.back.insertAdjacentHTML("beforeend", newFront);			
+			Modal.front = newFront;
+			Modal.back.insertAdjacentHTML("beforeend", Modal.front);			
 		}
 		else{
 			Modal.back.appendChild(Modal.front);
@@ -156,8 +155,8 @@ let Modal = {
 		//Se retiran las barras de desplazamiento del documento
 		document.body.style.overflow = "hidden";
 
-		//Si el bloque frontal es personalizado, se redimensiona
-		if (newFront) Modal.resize();
+		//Se redimensionan los elementos de la ventana modal
+		Modal.resize();
 
 		//Se cierra la ventana modal al pulsar el fondo oscuro o la X
 		document.addEventListener("click", e => {
@@ -221,7 +220,15 @@ let Modal = {
 		front.style.minWidth = window.innerWidth * .5 + "px";
 		front.style.maxWidth = window.innerWidth * .75 + "px";
 		front.style.minHeight = window.innerHeight * .45 + "px";
-		front.style.maxHeight = window.innerHeight * .95 + "px";		
+		front.style.maxHeight = window.innerHeight * .9 + "px";		
+
+		Modal.close.style.opacity = 0;
+
+		setTimeout(_ => {
+			Modal.close.style.top = front.getBoundingClientRect().top + "px";
+			Modal.close.style.left = (front.getBoundingClientRect().right - Modal.close.getBoundingClientRect().width * 1.5) + "px";
+			Modal.close.style.opacity = 1;
+		}, Modal.animationTime);
 	},
 
 	getContent: (url, query) => {
@@ -253,6 +260,7 @@ let Modal = {
 
 					Modal.back.appendChild(left);
 					Modal.back.appendChild(right);
+					Modal.resize();
 
 					document.addEventListener("click", e => {
 						let elem = e.target;
@@ -274,6 +282,7 @@ let Modal = {
 			}
 			else{
 				Modal.front.innerHTML = response;
+				Modal.resize();
 				Modal.callback && Modal.callback();
 			}
 		}).fail(error => Notification.msg(error));
