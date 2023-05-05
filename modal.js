@@ -17,7 +17,7 @@
  * @param		url 		String 				La URL de la cual se obtendrá el contenido
  * @param		query 		String 				Cadena de consulta para adjuntar a la URL
  * @param		newFront 	Plain text 			Cuadro que se mostrará en lugar de la ventana modal
- * @param		callback	Function			Llamada de retorno a ejecutarse al cerrarse la ventana modal
+ * @param		callback	Function			Llamada de retorno a ejecutarse luego de la carga del contenido de la ventana modal
  * @param		alignment	String 				Alineación del contenido
  * @param		borders 	String 				Estilo de bordes de la ventana modal
  * @param		time 		Number 				Duración de la animación para mostrar y ocultar la ventana modal
@@ -31,7 +31,7 @@ let Modal = {
 		url,  //URL de la cual se obtendrá el contenido
 		query, //Cadena de consulta para adjuntar a la URL
 		newFront, //Cuadro que se mostrará en lugar de la ventana modal
-		callback, //Llamada de retorno a ejecutarse al cerrarse la ventana modal
+		callback, //Llamada de retorno a ejecutarse luego de la carga del contenido de la ventana modal
 		alignment, //Alineación del contenido
 		borders, //Estilo de bordes de la ventana modal
 		time //Duración de la animación para mostrar y ocultar la ventana modal
