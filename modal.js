@@ -7,6 +7,7 @@
  * Se emplearon los archivos ajax.js y notification.js, listados en el repositorio.
  * Pueden ser encontrados aquí: https://github.com/Alexis88?tab=repositories
  * 
+ * MODO DE USO: Modal.show(parámetros)
  *
  * @author		Alexis López Espinoza
  * @version		1.0
