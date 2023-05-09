@@ -8,9 +8,6 @@
  * Pueden ser encontrados aquí: https://github.com/Alexis88?tab=repositories
  * 
  *
- * MODO DE USO: Modal.show("El contenido"); 
- * 
- *
  * @author		Alexis López Espinoza
  * @version		1.0
  * @param		data		String/Plain text	El contenido de la ventana modal
