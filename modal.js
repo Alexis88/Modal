@@ -210,6 +210,8 @@ let Modal = {
 
 	hideAll: _ => [...document.querySelectorAll(".modalBack")].forEach(modal => Modal.hide(modal)),
 
+	exists: _ => document.querySelectorAll(".modalBack"),
+
 	resize: _ => {
 		Modal.back.style.width = window.innerWidth + "px";
 		Modal.back.style.height = window.innerHeight + "px";
