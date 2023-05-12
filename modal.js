@@ -7,7 +7,9 @@
  * Se emplearon los archivos ajax.js y notification.js, listados en el repositorio.
  * Pueden ser encontrados aquí: https://github.com/Alexis88?tab=repositories
  * 
- * MODO DE USO: Modal.show(parámetros)
+ *
+ * MODO DE USO: Modal.show("El contenido"); 
+ * 
  *
  * @author		Alexis López Espinoza
  * @version		1.0
@@ -91,7 +93,7 @@ let Modal = {
 		Modal.close = document.createElement("b");
 		Modal.close.classList.add("modalClose");
 		Modal.close.style.position = "fixed";
-		Modal.close.style.fontSize = "1.5rem";
+		Modal.close.style.fontSize = window.innerWidth < 850 ? ".9rem" : "1.4rem";
 		Modal.close.style.cursor = "pointer";
 		Modal.close.style.color = "#304145";
 		Modal.close.style.userSelect = "none";
@@ -141,6 +143,7 @@ let Modal = {
 		//Se adhiere el cuadro al fondo
 		if (newFront){
 			Modal.front = newFront;
+			Modal.front.classList.add("modalFront");
 			Modal.back.insertAdjacentHTML("beforeend", Modal.front);			
 		}
 		else{
@@ -211,24 +214,36 @@ let Modal = {
 	exists: _ => document.querySelectorAll(".modalBack"),
 
 	resize: _ => {
-		Modal.back.style.width = window.innerWidth + "px";
-		Modal.back.style.height = window.innerHeight + "px";
-		Modal.back.style.top = (document.documentElement.scrollTop || document.body.scrollTop) + "px";
-		
-		let front = Modal.back.querySelector("b").nextElementSibling;
-		
-		front.style.minWidth = window.innerWidth * .5 + "px";
-		front.style.maxWidth = window.innerWidth * .75 + "px";
-		front.style.minHeight = window.innerHeight * .45 + "px";
-		front.style.maxHeight = window.innerHeight * .9 + "px";		
+		let back, front, close;
 
-		Modal.close.style.opacity = 0;
+		back = document.querySelector(".modalBack");
 
-		setTimeout(_ => {
-			Modal.close.style.top = front.getBoundingClientRect().top * 1.05 + "px";
-			Modal.close.style.left = (front.getBoundingClientRect().right - Modal.close.getBoundingClientRect().width * 1.55) + "px";
-			Modal.close.style.opacity = 1;
-		}, Modal.animationTime);
+		if (back){
+			back.style.width = window.innerWidth + "px";
+			back.style.height = window.innerHeight + "px";
+			back.style.top = (document.documentElement.scrollTop || document.body.scrollTop) + "px";
+		}
+		
+		front = document.querySelector(".modalFront");
+		
+		if (front){
+			front.style.minWidth = window.innerWidth * .5 + "px";
+			front.style.maxWidth = window.innerWidth * .75 + "px";
+			front.style.minHeight = window.innerHeight * .45 + "px";
+			front.style.maxHeight = window.innerHeight * .9 + "px";		
+		}
+
+		close = document.querySelector(".modalClose");
+
+		if (close){
+			close.style.opacity = 0;
+
+			setTimeout(_ => {
+				close.style.top = front.getBoundingClientRect().top * 1.05 + "px";
+				close.style.left = (front.getBoundingClientRect().right - close.getBoundingClientRect().width * 1.55) + "px";
+				close.style.opacity = 1;
+			}, Modal.animationTime);
+		}
 	},
 
 	getContent: (url, query) => {
