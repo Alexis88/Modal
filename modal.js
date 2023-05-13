@@ -216,6 +216,8 @@ let Modal = {
 	resize: _ => {
 		let back, front, close;
 
+		if (!Modal.exists()) return;
+
 		back = document.querySelector(".modalBack");
 
 		if (back){
