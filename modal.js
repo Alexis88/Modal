@@ -57,10 +57,8 @@ let Modal = {
 
 		//Animación para mostrar la ventana modal
 		Modal.back.animate([{
-			transform: "scale(0)",
 			opacity: 0
 		}, {
-			transform: "scale(1)",
 			opacity: 1
 		}], {
 			duration: Modal.animationTime
@@ -150,6 +148,17 @@ let Modal = {
 			Modal.back.appendChild(Modal.front);
 		}
 
+		//Animación para mostrar el contenido central
+		Modal.front.animate([{
+			transform: "scaleY(0)",
+			opacity: 0
+		}, {
+			transform: "scaleY(1)",
+			opacity: 1
+		}], {
+			duration: Modal.animationTime
+		});
+
 		//Se adhiere el fondo al documento
 		document.body.appendChild(Modal.back);
 
@@ -183,16 +192,29 @@ let Modal = {
 	},
 
 	hide: modal => {
+		let front = modal.querySelector(".modalFront");
+
 		//Se oculta la ventana modal con un efecto de animación
 		modal.animate([{
-			transform: "scale(1)",
 			opacity: 1
 		}, {
-			transform: "scale(0)",
 			opacity: 0
 		}], {
 			duration: Modal.animationTime
 		});
+
+		//Se oculta el contenido central con un efecto de animación
+		if (front){
+			front.animate([{
+				transform: "scaleY(1)",
+				opacity: 1
+			}, {
+				transform: "scaleY(0)",
+				opacity: 0
+			}], {
+				duration: Modal.animationTime
+			});
+		}
 
 		//Se oculta la ventana modal del todo (para evitar el problema del parpadeo)
 		modal.style.opacity = 0;
