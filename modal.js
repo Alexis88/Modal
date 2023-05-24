@@ -236,38 +236,38 @@ let Modal = {
 	exists: _ => document.querySelectorAll(".modalBack"),
 
 	resize: _ => {
-		let back, front, close;
+		let front, close;
 
 		if (!Modal.exists()) return;
 
-		back = document.querySelector(".modalBack");
-
-		if (back){
+		[...document.querySelectorAll(".modalBack")].forEach(back => {
 			back.style.width = window.innerWidth + "px";
 			back.style.height = window.innerHeight + "px";
 			back.style.top = (document.documentElement.scrollTop || document.body.scrollTop) + "px";
-		}
 		
-		front = document.querySelector(".modalFront");
+			//Contenido central
+			front = back.querySelector(".modalFront");
 		
-		if (front){
-			front.style.minWidth = window.innerWidth * .5 + "px";
-			front.style.maxWidth = window.innerWidth * .75 + "px";
-			front.style.minHeight = window.innerHeight * .45 + "px";
-			front.style.maxHeight = window.innerHeight * .9 + "px";		
-		}
+			if (front){
+				front.style.minWidth = window.innerWidth * .5 + "px";
+				front.style.maxWidth = window.innerWidth * .75 + "px";
+				front.style.minHeight = window.innerHeight * .45 + "px";
+				front.style.maxHeight = window.innerHeight * .9 + "px";		
+			}
 
-		close = document.querySelector(".modalClose");
+			//Botón de cerrado
+			close = back.querySelector(".modalClose");
 
-		if (close){
-			close.style.opacity = 0;
+			if (close){
+				close.style.opacity = 0;
 
-			setTimeout(_ => {
-				close.style.top = front.getBoundingClientRect().top * 1.05 + "px";
-				close.style.left = (front.getBoundingClientRect().right - close.getBoundingClientRect().width * 1.55) + "px";
-				close.style.opacity = 1;
-			}, Modal.animationTime);
-		}
+				setTimeout(_ => {
+					close.style.top = front.getBoundingClientRect().top * 1.05 + "px";
+					close.style.left = (front.getBoundingClientRect().right - close.getBoundingClientRect().width * 1.55) + "px";
+					close.style.opacity = 1;
+				}, Modal.animationTime);
+			}
+		});
 	},
 
 	getContent: (url, query) => {
