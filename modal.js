@@ -21,6 +21,7 @@
  * @param		alignment	String 				Alineación del contenido
  * @param		borders 	String 				Estilo de bordes de la ventana modal
  * @param		time 		Number 				Duración de la animación para mostrar y ocultar la ventana modal
+ * @param		hideCall	Function			Llamada de retorno a ejecutarse luego de cerrar la ventana modal
  */
 
 "use strict";
@@ -34,7 +35,8 @@ let Modal = {
 		callback, //Llamada de retorno a ejecutarse luego de la carga del contenido de la ventana modal
 		alignment, //Alineación del contenido
 		borders, //Estilo de bordes de la ventana modal
-		time //Duración de la animación para mostrar y ocultar la ventana modal
+		time, //Duración de la animación para mostrar y ocultar la ventana modal
+		hideCall //Llamada de retorno a ejecutarse luego de cerrar la ventana modal
 	) => {
 		//El fondo
 		Modal.back = document.createElement("div");
@@ -111,6 +113,7 @@ let Modal = {
 		}
 
 		Modal.callback = callback && {}.toString.call(callback) == "[object Function]" ? callback : false;
+		Modal.hideCall = hideCall && {}.toString.call(hideCall) == "[object Function]" ? hideCall : false;
 
 		//Clases de elementos
 		Modal.clases = ["modalClose", "arrow"];
@@ -228,6 +231,9 @@ let Modal = {
 			if (!document.querySelectorAll(".modalBack").length){
 				document.body.style.overflowY = "auto";
 			}			
+
+			//Si hay una llamada de retorno asociada, se ejecuta
+			Modal.hideCall && Modal.hideCall();
 		}, Modal.animationTime);
 	},
 
