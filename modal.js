@@ -1,4 +1,4 @@
-/*
+/**
  * VENTANA MODAL PERSONALIZADA
  * 
  * Este script genera una ventana modal en el que se puede mostrar contenido de cualquier tipo, sea texto 
