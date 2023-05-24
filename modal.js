@@ -38,8 +38,16 @@ let Modal = {
 		time, //Duración de la animación para mostrar y ocultar la ventana modal
 		hideCall //Llamada de retorno a ejecutarse luego de cerrar la ventana modal
 	) => {
+		//Marca de tiempo
+		let timestamp = new Date().getTime(),
+			modalID = `modalID-${timestamp}`;
+
+		//ID de la ventana modal
+		Modal.id = modalID;
+
 		//El fondo
-		Modal.back = document.createElement("div");
+		Modal.back = document.createElement("div");		
+		Modal.back.id = modalID;
 		Modal.back.classList.add("modalBack");
 		Modal.back.style.width = window.innerWidth + "px";
 		Modal.back.style.height = window.innerHeight + "px";
@@ -112,6 +120,7 @@ let Modal = {
 			}
 		}
 
+		//Llamadas de retorno
 		Modal.callback = callback && {}.toString.call(callback) == "[object Function]" ? callback : false;
 		Modal.hideCall = hideCall && {}.toString.call(hideCall) == "[object Function]" ? hideCall : false;
 
@@ -171,6 +180,18 @@ let Modal = {
 		//Se redimensionan los elementos de la ventana modal
 		Modal.resize();
 
+		//Se recupera la cola de ventanas modales o se inicia una nueva
+		Modal.queue = Modal.queue || [];
+
+		//Se hace una copia de la configuración de la ventana modal
+		let tempModal = {...Modal};
+
+		//Se elimina el encolado de la copia
+		delete tempModal.queue;
+
+		//Se encola la ventana modal
+		Modal.queue.push(tempModal);
+
 		//Se cierra la ventana modal al pulsar el fondo oscuro o la X
 		document.addEventListener("click", e => {
 			let elem = e.target, modal;
@@ -195,7 +216,8 @@ let Modal = {
 	},
 
 	hide: modal => {
-		let front = modal.querySelector(".modalFront");
+		let modalQueued = Modal.queue.find(mod => mod.id == modal.id),
+			front = modal.querySelector(".modalFront");
 
 		//Se oculta la ventana modal con un efecto de animación
 		modal.animate([{
@@ -203,7 +225,7 @@ let Modal = {
 		}, {
 			opacity: 0
 		}], {
-			duration: Modal.animationTime
+			duration: modalQueued?.animationTime || Modal.animationTime
 		});
 
 		//Se oculta el contenido central con un efecto de animación
@@ -215,7 +237,7 @@ let Modal = {
 				transform: "scaleY(0)",
 				opacity: 0
 			}], {
-				duration: Modal.animationTime
+				duration: modalQueued?.animationTime || Modal.animationTime
 			});
 		}
 
@@ -230,11 +252,14 @@ let Modal = {
 			//Si ya no otras ventanas modales mostrándose, se restaura la barra de desplazamiento
 			if (!document.querySelectorAll(".modalBack").length){
 				document.body.style.overflowY = "auto";
-			}			
+			}
+			else{
+				Modal.resize();
+			}		
 
 			//Si hay una llamada de retorno asociada, se ejecuta
-			Modal.hideCall && Modal.hideCall();
-		}, Modal.animationTime);
+			modalQueued?.hideCall && modalQueued?.hideCall();
+		}, modalQueued?.animationTime || Modal.animationTime);
 	},
 
 	hideAll: _ => [...document.querySelectorAll(".modalBack")].forEach(modal => Modal.hide(modal)),
