@@ -13,34 +13,29 @@
  *
  * @author		Alexis López Espinoza
  * @version		1.0
- * @param		data		String/Plain text	El contenido de la ventana modal
- * @param		url 		String 				La URL de la cual se obtendrá el contenido
- * @param		query 		String 				Cadena de consulta para adjuntar a la URL
- * @param		newFront 	Plain text 			Cuadro que se mostrará en lugar de la ventana modal
- * @param		callback	Function			Llamada de retorno a ejecutarse luego de la carga del contenido de la ventana modal
- * @param		alignment	String 				Alineación del contenido
- * @param		borders 	String 				Estilo de bordes de la ventana modal
- * @param		time 		Number 				Duración de la animación para mostrar y ocultar la ventana modal
- * @param		hideCall	Function			Llamada de retorno a ejecutarse luego de cerrar la ventana modal
+ * @param		options		Plain Object
  */
 
 "use strict";
 
 let Modal = {
 	show: (
-		data, //El contenido plano a mostrarse
-		url,  //URL de la cual se obtendrá el contenido
-		query, //Cadena de consulta para adjuntar a la URL
-		newFront, //Cuadro que se mostrará en lugar de la ventana modal
-		callback, //Llamada de retorno a ejecutarse luego de la carga del contenido de la ventana modal
-		alignment, //Alineación del contenido
-		borders, //Estilo de bordes de la ventana modal
-		time, //Duración de la animación para mostrar y ocultar la ventana modal
-		hideCall //Llamada de retorno a ejecutarse luego de cerrar la ventana modal
+		options
+		/*** OPCIONES DE CONFIGURACIÓN ***
+		 * 
+		 * options.data: El contenido plano a mostrarse
+		 * options.url: URL de la cual se obtendrá el contenido
+		 * options.query: Cadena de consulta para adjuntar a la URL
+		 * options.newFront: Cuadro que se mostrará en lugar de la ventana modal
+		 * options.callback: Llamada de retorno a ejecutarse luego de la carga del contenido de la ventana modal
+		 * options.hideCall: Llamada de retorno a ejecutarse luego de cerrar la ventana modal
+		 * options.align: Alineación del contenido
+		 * options.borders: Estilo de bordes de la ventana modal
+		 * options.time: Duración de la animación para mostrar y ocultar la ventana modal
+		 */
 	) => {
 		//Marca de tiempo
-		let timestamp = new Date().getTime(),
-			modalID = `modalID-${timestamp}`;
+		let modalID = `modalID-${new Date().getTime()}`;
 
 		//ID de la ventana modal
 		Modal.id = modalID;
@@ -63,7 +58,7 @@ let Modal = {
 		Modal.back.style.transition = "all ease .15s";
 
 		//Duración de la animación para mostrar y ocultar la ventana modal
-		Modal.animationTime = time || 400;
+		Modal.animationTime = options.time || 400;
 
 		//Animación para mostrar la ventana modal
 		Modal.back.animate([{
@@ -85,17 +80,17 @@ let Modal = {
 		Modal.front.style.alignItems = "center !important";
 		Modal.front.style.justifyContent = "center !important";
 		Modal.front.style.margin = "0 auto";
-		Modal.front.style.textAlign = alignment || "center";
+		Modal.front.style.textAlign = options.align || "center";
 		Modal.front.style.overflow = "auto";
 		Modal.front.style.backgroundColor = "snow";
 		Modal.front.style.paddingTop = "1%";
 		Modal.front.style.paddingBottom = "1%";
 		Modal.front.style.paddingRight = "2.5%";
 		Modal.front.style.paddingLeft = "2.5%";
-		Modal.front.style.borderRadius = borders || 0;
+		Modal.front.style.borderRadius = options.borders || 0;
 		Modal.front.style.transition = "all ease .15s";
 		Modal.front.style.wordWrap = "break-word";
-		Modal.front.innerHTML = data;
+		Modal.front.innerHTML = options.data || "";
 
 		//Botón para cerrar la ventana modal
 		Modal.close = document.createElement("b");
@@ -110,19 +105,19 @@ let Modal = {
 		Modal.close.title = "Cerrar esta ventana";
 
 		//La URL de consulta
-		if (url && url.length){
+		if (options.url?.length){
 			//La cadena de consulta
-			if (query && query.length){
-				Modal.getContent(url, query);
+			if (options.query?.length){
+				Modal.getContent(options.url, options.query);
 			}
 			else{
-				Modal.getContent(url);
+				Modal.getContent(options.url);
 			}
 		}
 
 		//Llamadas de retorno
-		Modal.callback = callback && {}.toString.call(callback) == "[object Function]" ? callback : false;
-		Modal.hideCall = hideCall && {}.toString.call(hideCall) == "[object Function]" ? hideCall : false;
+		Modal.callback = options.callback && {}.toString.call(options.callback) == "[object Function]" ? options.callback : false;
+		Modal.hideCall = options.hideCall && {}.toString.call(options.hideCall) == "[object Function]" ? options.hideCall : false;
 
 		//Clases de elementos
 		Modal.clases = ["modalClose", "arrow"];
@@ -151,8 +146,8 @@ let Modal = {
 		Modal.back.appendChild(Modal.close);
 
 		//Se adhiere el cuadro al fondo
-		if (newFront){
-			Modal.front = newFront;
+		if (options.newFront){
+			Modal.front = options.newFront;
 			Modal.front.classList.add("modalFront");
 			Modal.back.insertAdjacentHTML("beforeend", Modal.front);			
 		}
