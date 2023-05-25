@@ -189,7 +189,7 @@ let Modal = {
 		//Se elimina el encolado de la copia
 		delete tempModal.queue;
 
-		//Se encola la ventana modal
+		//Se encola la configuración de la ventana modal
 		Modal.queue.push(tempModal);
 
 		//Se cierra la ventana modal al pulsar el fondo oscuro o la X
@@ -216,7 +216,8 @@ let Modal = {
 	},
 
 	hide: modal => {
-		let modalQueued = Modal.queue.find(mod => mod.id == modal.id),
+		let modalQueued = {...Modal.queue.find(mod => mod.id == modal.id)},
+			modalQueuedIndex = Modal.queue.findIndex(mod => mod.id == modal.id),
 			front = modal.querySelector(".modalFront");
 
 		//Se oculta la ventana modal con un efecto de animación
@@ -247,17 +248,21 @@ let Modal = {
 		//Terminado el tiempo de animación se eliminan el fondo y su contenido, se devuelve al documento sus barras de desplazamiento y el valor del comodín vuelve a true
 		setTimeout(_ => {
 			//Si la ventana modal existe, se la elimina del documento
-			modal && modal.remove();
+			modal && modal.remove();	
 
 			//Si ya no otras ventanas modales mostrándose, se restaura la barra de desplazamiento
 			if (!document.querySelectorAll(".modalBack").length){
 				document.body.style.overflowY = "auto";
 			}
+			//Si no, se redimensionan las restantes (para prevenir problemas de posicionamiento del botón de cerrado)
 			else{
 				Modal.resize();
-			}		
+			}			
 
-			//Si hay una llamada de retorno asociada, se ejecuta
+			//Se elimina la copia de la ventana modal la cola			
+			Modal.queue.splice(modalQueuedIndex, 1);
+
+			//Si hay una llamada de retorno de cierre de ventana, se ejecuta
 			modalQueued?.hideCall && modalQueued?.hideCall();
 		}, modalQueued?.animationTime || Modal.animationTime);
 	},
