@@ -8,18 +8,18 @@
  * Pueden ser encontrados aquí: https://github.com/Alexis88?tab=repositories
  * 
  *
- * MODO DE USO: Modal.show({opciones de configuración}); 
+ * MODO DE USO: Modal.show("El contenido"); 
  * 
  *
  * @author		Alexis López Espinoza
  * @version		2.0
- * @param		options		Plain Object
+ * @param		options		Plain Object/String
  */
 
 "use strict";
 
 let Modal = {
-	show: (
+	show: function(
 		options
 		/*** OPCIONES DE CONFIGURACIÓN ***
 		 * 
@@ -33,12 +33,21 @@ let Modal = {
 		 * options.borders: Estilo de bordes de la ventana modal
 		 * options.time: Duración de la animación para mostrar y ocultar la ventana modal
 		 */
-	) => {
+	){
 		//Marca de tiempo
 		let modalID = `modalID-${new Date().getTime()}`;
 
 		//ID de la ventana modal
 		Modal.id = modalID;
+
+		//Si se recibe solo un argumento y es una cadena de texto, se descarta el uso del objeto con las opciones de configuración
+		if (arguments.length === 1 && {}.toString.call(arguments[0]) === "[object String]"){
+			Modal.text = options;
+		}
+		//Caso contrario, se conserva el objeto con las opciones de configuración
+		else{
+			Modal.options = options;
+		}
 
 		//El fondo
 		Modal.back = document.createElement("div");		
@@ -58,7 +67,7 @@ let Modal = {
 		Modal.back.style.transition = "all ease .15s";
 
 		//Duración de la animación para mostrar y ocultar la ventana modal
-		Modal.animationTime = options.time || 400;
+		Modal.animationTime = Modal.options?.time || 400;
 
 		//Animación para mostrar la ventana modal
 		Modal.back.animate([{
@@ -80,17 +89,17 @@ let Modal = {
 		Modal.front.style.alignItems = "center !important";
 		Modal.front.style.justifyContent = "center !important";
 		Modal.front.style.margin = "0 auto";
-		Modal.front.style.textAlign = options.align || "center";
+		Modal.front.style.textAlign = Modal.options?.align || "center";
 		Modal.front.style.overflow = "auto";
 		Modal.front.style.backgroundColor = "snow";
 		Modal.front.style.paddingTop = "1%";
 		Modal.front.style.paddingBottom = "1%";
 		Modal.front.style.paddingRight = "2.5%";
 		Modal.front.style.paddingLeft = "2.5%";
-		Modal.front.style.borderRadius = options.borders || 0;
+		Modal.front.style.borderRadius = Modal.options?.borders || 0;
 		Modal.front.style.transition = "all ease .15s";
 		Modal.front.style.wordWrap = "break-word";
-		Modal.front.innerHTML = options.data || "";
+		Modal.front.innerHTML = Modal.options?.data || Modal.text;
 
 		//Botón para cerrar la ventana modal
 		Modal.close = document.createElement("b");
@@ -105,7 +114,7 @@ let Modal = {
 		Modal.close.title = "Cerrar esta ventana";
 
 		//La URL de consulta
-		if (options.url?.length){
+		if (options?.url?.length){
 			//La cadena de consulta
 			if (options.query?.length){
 				Modal.getContent(options.url, options.query);
@@ -115,9 +124,11 @@ let Modal = {
 			}
 		}
 
-		//Llamadas de retorno
-		Modal.callback = options.callback && {}.toString.call(options.callback) == "[object Function]" ? options.callback : false;
-		Modal.hideCall = options.hideCall && {}.toString.call(options.hideCall) == "[object Function]" ? options.hideCall : false;
+		//Llamada de retorno a ejecutarse luego de cargar el contenido de la ventana modal
+		Modal.callback = Modal.options?.callback && {}.toString.call(Modal.options?.callback) == "[object Function]" ? Modal.options.callback : false;
+
+		//Llamada de retorno a ejecutarse luego de cerrar la ventana modal
+		Modal.hideCall = Modal.options?.hideCall && {}.toString.call(Modal.options?.hideCall) == "[object Function]" ? Modal.options.hideCall : false;
 
 		//Clases de elementos
 		Modal.clases = ["modalClose", "arrow"];
@@ -146,8 +157,8 @@ let Modal = {
 		Modal.back.appendChild(Modal.close);
 
 		//Se adhiere el cuadro al fondo
-		if (options.newFront){
-			Modal.front = options.newFront;
+		if (Modal.options?.newFront){
+			Modal.front = Modal.options.newFront;
 			Modal.front.classList.add("modalFront");
 			Modal.back.insertAdjacentHTML("beforeend", Modal.front);			
 		}
@@ -258,7 +269,7 @@ let Modal = {
 			Modal.queue.splice(modalQueuedIndex, 1);
 
 			//Si hay una llamada de retorno de cierre de ventana, se ejecuta
-			modalQueued?.hideCall && modalQueued?.hideCall();
+			modalQueued?.hideCall && modalQueued.hideCall();
 		}, modalQueued?.animationTime || Modal.animationTime);
 	},
 
