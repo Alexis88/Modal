@@ -29,9 +29,7 @@ let Modal = {
 		 * options.newFront: Cuadro que se mostrará en lugar de la ventana modal
 		 * options.callback: Llamada de retorno a ejecutarse luego de la carga del contenido de la ventana modal
 		 * options.hideCall: Llamada de retorno a ejecutarse luego de cerrar la ventana modal
-		 * options.align: Alineación del contenido
-		 * options.content: Objeto con colores para el fondo del contenido central y el botón de cerrado
-		 * options.borders: Estilo de bordes de la ventana modal
+		 * options.content: Objeto con propiedades CSS para personalizar los elementos de la ventana modal
 		 * options.time: Duración de la animación para mostrar y ocultar la ventana modal
 		 */
 	){
@@ -86,7 +84,7 @@ let Modal = {
 		//Cuadro que mostrará el texto y/o imágenes
 		Modal.front = document.createElement("div");
 		Modal.front.classList.add("modalFront");
-		Modal.front.style.backgroundColor = Modal.options?.content?.front?.length ? Modal.options.content.front : "#FFFFEF";
+		Modal.front.style.backgroundColor = Modal.options?.content?.front?.backgroundColor?.length ? Modal.options.content.front.backgroundColor : "#FFFFEF";
 		Modal.front.style.minWidth = window.innerWidth * .5 + "px";
 		Modal.front.style.maxWidth = window.innerWidth * .75 + "px";
 		Modal.front.style.minHeight = window.innerHeight * .45 + "px";
@@ -95,13 +93,15 @@ let Modal = {
 		Modal.front.style.alignItems = "center !important";
 		Modal.front.style.justifyContent = "center !important";
 		Modal.front.style.margin = "0 auto";
-		Modal.front.style.textAlign = Modal.options?.align || "center";
+		Modal.front.style.textAlign = Modal.options?.content?.front?.textAlign?.length ? Modal.options.content.front.textAlign : "center";
 		Modal.front.style.overflow = "auto";		
 		Modal.front.style.paddingTop = "1%";
 		Modal.front.style.paddingBottom = "1%";
 		Modal.front.style.paddingRight = "2.5%";
 		Modal.front.style.paddingLeft = "2.5%";
-		Modal.front.style.borderRadius = Modal.options?.borders || 0;
+		Modal.front.style.boxShadow = "0 3px 10px rgb(0 0 0 / 0.2)";
+		Modal.front.style.border = Modal.options?.content?.front?.border?.length ? Modal.options.content.front.border : "";
+		Modal.front.style.borderRadius = Modal.options?.content?.front?.borderRadius?.length ? Modal.options.content.front.borderRadius : 0;
 		Modal.front.style.transition = "all ease .15s";
 		Modal.front.style.wordWrap = "break-word";
 		Modal.front.innerHTML = Modal.options?.data || Modal.text;
@@ -112,7 +112,7 @@ let Modal = {
 		Modal.close.style.position = "fixed";
 		Modal.close.style.fontSize = window.innerWidth < 850 ? ".9rem" : "1.4rem";
 		Modal.close.style.cursor = "pointer";
-		Modal.close.style.color = Modal.options?.content?.close?.length ? Modal.options.content.close : "#304145";
+		Modal.close.style.color = Modal.options?.content?.close?.color?.length ? Modal.options.content.close.color : "#304145";
 		Modal.close.style.userSelect = "none";
 		Modal.close.style.transition = "all ease .2s";
 		Modal.close.textContent = "❌";
