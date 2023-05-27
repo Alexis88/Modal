@@ -30,8 +30,7 @@ let Modal = {
 		 * options.callback: Llamada de retorno a ejecutarse luego de la carga del contenido de la ventana modal
 		 * options.hideCall: Llamada de retorno a ejecutarse luego de cerrar la ventana modal
 		 * options.align: Alineación del contenido
-		 * options.class: Clase que se añadirá al contenido central de la ventana modal
-		 * options.classClose: Clase que se añadirá al botón de cerrado de la ventana modal
+		 * options.content: Objeto con colores para el fondo del contenido central y el botón de cerrado
 		 * options.borders: Estilo de bordes de la ventana modal
 		 * options.time: Duración de la animación para mostrar y ocultar la ventana modal
 		 */
@@ -42,13 +41,17 @@ let Modal = {
 		//ID de la ventana modal
 		Modal.id = modalID;
 
-		//Si se recibe solo un argumento y es una cadena de texto, se descarta el uso del objeto con las opciones de configuración
-		if (arguments.length === 1 && {}.toString.call(arguments[0]) === "[object String]"){
+		//Si se recibe una cadena de texto como argumento, se descarta el uso del objeto con las opciones de configuración
+		if (arguments.length && {}.toString.call(arguments[0]) === "[object String]"){
 			Modal.text = options;
 		}
-		//Caso contrario, se conserva el objeto con las opciones de configuración
-		else{
+		//Si se recibe un objeto como argumento, se conserva el objeto con las opciones de configuración
+		else if (arguments.length && {}.toString.call(arguments[0]) === "[object Object]"){
 			Modal.options = options;
+		}
+		//Caso contrario, se aborta la ejecución
+		else{
+			return;
 		}
 
 		//El fondo
@@ -83,8 +86,7 @@ let Modal = {
 		//Cuadro que mostrará el texto y/o imágenes
 		Modal.front = document.createElement("div");
 		Modal.front.classList.add("modalFront");
-		Modal.front.style.backgroundColor = "#FFFFEF";
-		Modal.options?.class?.length && Modal.front.classList.add(Modal.options.class);
+		Modal.front.style.backgroundColor = Modal.options?.content?.front?.length ? Modal.options.content.front : "#FFFFEF";
 		Modal.front.style.minWidth = window.innerWidth * .5 + "px";
 		Modal.front.style.maxWidth = window.innerWidth * .75 + "px";
 		Modal.front.style.minHeight = window.innerHeight * .45 + "px";
@@ -107,11 +109,10 @@ let Modal = {
 		//Botón para cerrar la ventana modal
 		Modal.close = document.createElement("b");
 		Modal.close.classList.add("modalClose");
-		Modal.options?.classClose?.length && Modal.close.classList.add(Modal.options.classClose);
 		Modal.close.style.position = "fixed";
 		Modal.close.style.fontSize = window.innerWidth < 850 ? ".9rem" : "1.4rem";
 		Modal.close.style.cursor = "pointer";
-		Modal.close.style.color = "#304145";
+		Modal.close.style.color = Modal.options?.content?.close?.length ? Modal.options.content.close : "#304145";
 		Modal.close.style.userSelect = "none";
 		Modal.close.style.transition = "all ease .2s";
 		Modal.close.textContent = "❌";
