@@ -8,12 +8,12 @@
  * Pueden ser encontrados aquí: https://github.com/Alexis88?tab=repositories
  * 
  *
- * MODO DE USO: Modal.show("El contenido"); 
+ * MODO DE USO: Modal.show("Texto a mostrar"/{Objeto de opciones de configuración}); 
  * 
  *
  * @author		Alexis López Espinoza
  * @version		2.0
- * @param		options		Plain Object/String
+ * @param		options			Plain Object/String
  */
 
 "use strict";
@@ -184,7 +184,7 @@ let Modal = {
 		document.body.style.overflow = "hidden";
 
 		//Se redimensionan los elementos de la ventana modal
-		Modal.resize();
+		setTimeout(Modal.resize, Modal.animationTime);
 
 		//Se recupera la cola de ventanas modales o se inicia una nueva
 		Modal.queue = Modal.queue || [];
