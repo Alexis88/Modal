@@ -83,7 +83,7 @@ let Modal = {
 		//Cuadro que mostrará el texto y/o imágenes
 		Modal.front = document.createElement("div");
 		Modal.front.classList.add("modalFront");
-		Modal.front.style.backgroundColor = "snow";
+		Modal.front.style.backgroundColor = "#FFFFEF";
 		Modal.options?.class?.length && Modal.front.classList.add(Modal.options.class);
 		Modal.front.style.minWidth = window.innerWidth * .5 + "px";
 		Modal.front.style.maxWidth = window.innerWidth * .75 + "px";
