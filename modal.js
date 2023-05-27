@@ -30,6 +30,8 @@ let Modal = {
 		 * options.callback: Llamada de retorno a ejecutarse luego de la carga del contenido de la ventana modal
 		 * options.hideCall: Llamada de retorno a ejecutarse luego de cerrar la ventana modal
 		 * options.align: Alineación del contenido
+		 * options.class: Clase que se añadirá al contenido central de la ventana modal
+		 * options.classClose: Clase que se añadirá al botón de cerrado de la ventana modal
 		 * options.borders: Estilo de bordes de la ventana modal
 		 * options.time: Duración de la animación para mostrar y ocultar la ventana modal
 		 */
@@ -81,6 +83,8 @@ let Modal = {
 		//Cuadro que mostrará el texto y/o imágenes
 		Modal.front = document.createElement("div");
 		Modal.front.classList.add("modalFront");
+		Modal.front.style.backgroundColor = "snow";
+		Modal.options?.class?.length && Modal.front.classList.add(Modal.options.class);
 		Modal.front.style.minWidth = window.innerWidth * .5 + "px";
 		Modal.front.style.maxWidth = window.innerWidth * .75 + "px";
 		Modal.front.style.minHeight = window.innerHeight * .45 + "px";
@@ -90,8 +94,7 @@ let Modal = {
 		Modal.front.style.justifyContent = "center !important";
 		Modal.front.style.margin = "0 auto";
 		Modal.front.style.textAlign = Modal.options?.align || "center";
-		Modal.front.style.overflow = "auto";
-		Modal.front.style.backgroundColor = "snow";
+		Modal.front.style.overflow = "auto";		
 		Modal.front.style.paddingTop = "1%";
 		Modal.front.style.paddingBottom = "1%";
 		Modal.front.style.paddingRight = "2.5%";
@@ -104,6 +107,7 @@ let Modal = {
 		//Botón para cerrar la ventana modal
 		Modal.close = document.createElement("b");
 		Modal.close.classList.add("modalClose");
+		Modal.options?.classClose?.length && Modal.close.classList.add(Modal.options.classClose);
 		Modal.close.style.position = "fixed";
 		Modal.close.style.fontSize = window.innerWidth < 850 ? ".9rem" : "1.4rem";
 		Modal.close.style.cursor = "pointer";
@@ -163,7 +167,7 @@ let Modal = {
 			Modal.back.insertAdjacentHTML("beforeend", Modal.front);			
 		}
 		else{
-			Modal.back.appendChild(Modal.front);
+			Modal.back.appendChild(Modal.front);			
 		}
 
 		//Animación para mostrar el contenido central
@@ -179,6 +183,12 @@ let Modal = {
 
 		//Se adhiere el fondo al documento
 		document.body.appendChild(Modal.back);
+
+		//Si no se estableció un contenido central alternativo
+		if (Modal.options && !("newFront" in Modal.options)){
+			//Se ejecuta la llamada de retorno en caso haya una
+			Modal.callback && Modal.callback();
+		}
 
 		//Se retiran las barras de desplazamiento del documento
 		document.body.style.overflow = "hidden";
