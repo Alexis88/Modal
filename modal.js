@@ -26,6 +26,7 @@ let Modal = {
 		 * options.data: El contenido plano a mostrarse
 		 * options.url: URL de la cual se obtendrá el contenido
 		 * options.query: Cadena de consulta para adjuntar a la URL
+		 * options.error: Llamada de retorno a ejecutarse si ocurre un error en la carga de un contenido externo
 		 * options.newFront: Cuadro que se mostrará en lugar de la ventana modal
 		 * options.callback: Llamada de retorno a ejecutarse luego de la carga del contenido de la ventana modal
 		 * options.hideCall: Llamada de retorno a ejecutarse luego de cerrar la ventana modal
@@ -122,10 +123,17 @@ let Modal = {
 		if (options?.url?.length){
 			//La cadena de consulta
 			if (options.query?.length){
-				Modal.getContent(options.url, options.query);
+				Modal.getContent({
+					url: options.url, 
+					query: options.query, 
+					error: options.error
+				});
 			}
 			else{
-				Modal.getContent(options.url);
+				Modal.getContent({
+					url: options.url, 
+					error: options.error
+				});
 			}
 		}
 
@@ -315,31 +323,39 @@ let Modal = {
 				close.style.opacity = 0;
 
 				setTimeout(_ => {
-					close.style.top = front.getBoundingClientRect().top * 1.05 + "px";
-					close.style.left = (front.getBoundingClientRect().right - close.getBoundingClientRect().width * 1.55) + "px";
+					close.style.top = front.getBoundingClientRect().top * 1.065 + "px";
+					close.style.left = (front.getBoundingClientRect().right - close.getBoundingClientRect().width * (front.scrollHeight > front.clientHeight ? 2 : 1.55)) + "px";
 					close.style.opacity = 1;
 				}, Modal.animationTime);
 			}
 		});
 	},
 
-	getContent: (url, query) => {
+	getContent: config => {
 		let options;
 
-		if (query){
+		if (config.query){
 			options = {
-				url: url,
+				url: config.url,
 				data: {
-					id: query
+					id: config.query
 				},
 				type: "json"
 			};
 		}
 		else{
-			options = {url: url};
+			options = {
+				url: config.url
+			};
 		}
 
 		Ajax(options).done(response => {
+			if (config.error && {}.toString.call(config.error) === "[object Function]"){
+				if (config.error(response)){
+					return;
+				}
+			}
+
 			if ("type" in options && response.length){
 				let content = response,
 					count = 0,
