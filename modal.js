@@ -40,16 +40,20 @@ let Modal = {
 		//ID de la ventana modal
 		Modal.id = modalID;
 
-		//Si se recibe una cadena de texto como argumento, se descarta el uso del objeto con las opciones de configuración
-		if (arguments.length && {}.toString.call(arguments[0]) === "[object String]"){
-			Modal.text = options;
-		}
-		//Si se recibe un objeto como argumento, se conserva el objeto con las opciones de configuración
-		else if (arguments.length && {}.toString.call(arguments[0]) === "[object Object]"){
-			Modal.options = options;
+		//Si se recibieron argumentos
+		if (arguments.length){
+			//Si se recibe una cadena de texto como argumento, se descarta el uso del objeto con las opciones de configuración
+			if ({}.toString.call(arguments[0]) !== "[object Object]"){
+				Modal.text = options;
+			}
+			//Si se recibe un objeto como argumento, se conserva el objeto con las opciones de configuración
+			else if ({}.toString.call(arguments[0]) === "[object Object]"){
+				Modal.options = options;
+			}
 		}
 		//Caso contrario, se aborta la ejecución
 		else{
+			throw new Error("Tiene que añadir un texto o un objeto con opciones de configuración para poder mostrar la ventana modal");
 			return;
 		}
 
