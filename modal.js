@@ -18,9 +18,8 @@
 
 "use strict";
 
-let Modal = {
-	show: function(
-		options
+const Modal = {
+	show: options => {
 		/*** OPCIONES DE CONFIGURACIÓN ***
 		 * 
 		 * options.data: El contenido plano a mostrarse
@@ -33,21 +32,21 @@ let Modal = {
 		 * options.content: Objeto con propiedades CSS para personalizar los elementos de la ventana modal
 		 * options.time: Duración de la animación para mostrar y ocultar la ventana modal
 		 */
-	){
-		//Marca de tiempo
-		let modalID = `modalID-${new Date().getTime()}`;
+
+		//Se libera la memoria ocupada por la configuración anterior (si hubo una)
+		delete Modal.options;
 
 		//ID de la ventana modal
-		Modal.id = modalID;
+		Modal.id = `modalID-${new Date().getTime()}`;
 
 		//Si se recibió argumentos
-		if (arguments.length){
+		if (options){
 			//Si el argumento no es un objeto, se lo establece como el texto a mostrar
-			if ({}.toString.call(arguments[0]) !== "[object Object]"){
+			if ({}.toString.call(options) !== "[object Object]"){
 				Modal.text = options;
 			}
 			//Si el argumento es un objeto, se lo establece como configuración de la ventana modal
-			else if ({}.toString.call(arguments[0]) === "[object Object]"){
+			else{
 				Modal.options = options;
 				Modal.text = options.data;
 			}
@@ -55,30 +54,145 @@ let Modal = {
 		//Caso contrario, se aborta la ejecución
 		else{
 			throw new Error("Tiene que añadir un texto o un objeto con opciones de configuración para poder mostrar la ventana modal");
-			return;
 		}
 
 		//El fondo
-		Modal.back = document.createElement("div");		
-		Modal.back.id = modalID;
-		Modal.back.classList.add("modalBack");
-		Modal.back.style.width = window.innerWidth + "px";
-		Modal.back.style.height = window.innerHeight + "px";
-		Modal.back.style.backgroundColor = "rgba(0, 0, 0, 0.6)";
-		Modal.back.style.top = (document.documentElement.scrollTop || document.body.scrollTop) + "px";
-		Modal.back.style.left = 0;
-		Modal.back.style.margin = 0;
-		Modal.back.style.position = "absolute";		
-		Modal.back.style.display = "flex";
-		Modal.back.style.alignItems = "center";
-		Modal.back.style.justifyContent = "center";
-		Modal.back.style.zIndex = "8888";
-		Modal.back.style.transition = "all ease .15s";
+		Modal.createBack();
 
 		//Duración de la animación para mostrar y ocultar la ventana modal
 		Modal.animationTime = Modal.options?.time || 400;
 
 		//Animación para mostrar la ventana modal
+		Modal.animateBack();
+
+		//Cuadro que mostrará el texto y/o imágenes
+		Modal.createFront();
+
+		//Botón para cerrar la ventana modal
+		Modal.createClose();
+
+		//Llamada de retorno a ejecutarse luego de cargar el contenido de la ventana modal
+		Modal.callback = Modal.options?.callback && {}.toString.call(Modal.options?.callback) == "[object Function]" ? Modal.options.callback : false;
+
+		//Llamada de retorno a ejecutarse luego de cerrar la ventana modal
+		Modal.hideCall = Modal.options?.hideCall && {}.toString.call(Modal.options?.hideCall) == "[object Function]" ? Modal.options.hideCall : false;
+
+		//Clases de elementos
+		Modal.clases = ["modalClose", "arrow"];		
+
+		//Se adhiere el botón para cerrar la ventana modal
+		Modal.back.appendChild(Modal.close);
+
+		//Se adhiere el cuadro al fondo
+		if (Modal.options?.newFront){
+			Modal.front = Modal.options.newFront;
+			Modal.front.classList.add("modalFront");
+			Modal.back.insertAdjacentHTML("beforeend", Modal.front);			
+		}
+		else{
+			Modal.back.appendChild(Modal.front);			
+		}
+
+		//Animación para mostrar el contenido central
+		Modal.animateFront();
+
+		//Se hace una copia de la configuración de la ventana modal
+		const config = {...Modal};
+
+		//La URL de consulta
+		Modal.urlContent(config);
+
+		//Se adhiere el fondo al documento
+		document.body.appendChild(config.back);
+
+		//Si no se estableció un contenido central alternativo
+		if (!config.options?.newFront){
+			//Se ejecuta la llamada de retorno en caso haya una
+			config.callback && config.callback();
+		}
+
+		//Se retiran las barras de desplazamiento del documento
+		document.body.style.overflow = "hidden";
+
+		//Se redimensionan los elementos de la ventana modal
+		setTimeout(Modal.resize, config.animationTime);
+
+		//Se recupera la cola de ventanas modales o se inicia una nueva
+		Modal.queue = Modal.queue || [];		
+
+		//Se encola la configuración de la ventana modal
+		Modal.queue.push(config);
+
+		//Configuración de eventos
+		Modal.events(config);
+	},
+
+	events: modalConfig => {
+		//Se cierra la ventana modal al pulsar el fondo oscuro o la X
+		modalConfig.close.addEventListener("click", _ => Modal.hide(modalConfig), false);
+
+		//Se aplica un efecto de transición en el botón de cerrado cuando se posa el cursor sobre él
+		modalConfig.close.addEventListener("mouseover", _ => modalConfig.close.style.transition = ".4s ease", false);
+
+		//Se elimina el efecto de transición del botón de cerrado al retirar el cursor de él
+		modalConfig.close.addEventListener("mouseout", _ => setTimeout(_ => modalConfig.close.style.transition = "none", 400), false);
+
+		document.addEventListener("mouseover", e => {
+			const elem = e.target;
+
+			Modal.clases.some(clase => {
+				if (elem.classList.contains(clase)){
+					elem.style.transform = "scale(1.2)";
+				}
+			});
+		}, false);
+
+		document.addEventListener("mouseout", e => {
+			const elem = e.target;
+
+			Modal.clases.some(clase => {
+				if (elem.classList.contains(clase)){
+					elem.style.transform = "scale(1)";
+				}
+			});
+		}, false);
+
+		//Cuando se pulse la tecla ESC, se cerrará la ventana modal
+		document.addEventListener("keyup", e => {
+			const list = Modal.queue;
+
+			if (e.which == 27){
+				Modal.hide(list[list.length - 1]);
+				e.stopImmediatePropagation();
+			}
+		}, false);
+
+		//Al girar el dispositivo, cambian las dimensiones del fondo
+		window.addEventListener("orientationchange", Modal.resize, false);
+		window.addEventListener("resize", Modal.resize, false);
+	},
+
+	createBack: _ => {
+		Modal.back = document.createElement("div");		
+		Modal.back.id = Modal.id;
+		Modal.back.classList.add("modalBack");
+		Modal.back.style = `
+			width: ${window.innerWidth}px;
+			height: ${window.innerHeight}px;
+			background-color: rgba(0, 0, 0, .6);
+			top: ${document.documentElement.scrollTop || document.body.scrollTop}px;
+			left: 0;
+			margin: 0;
+			position: absolute;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 8888;
+			transition: all ease .15s;
+		`;
+	},
+
+	animateBack: _ => {
 		Modal.back.animate([{
 			opacity: 0
 		}, {
@@ -86,45 +200,62 @@ let Modal = {
 		}], {
 			duration: Modal.animationTime
 		});
+	},
 
-		//Cuadro que mostrará el texto y/o imágenes
+	createFront: _ => {
 		Modal.front = document.createElement("div");
 		Modal.front.classList.add("modalFront");
-		Modal.front.style.backgroundColor = Modal.options?.content?.front?.backgroundColor?.length ? Modal.options.content.front.backgroundColor : "#FFFFEF";
-		Modal.front.style.minWidth = window.innerWidth * .5 + "px";
-		Modal.front.style.maxWidth = window.innerWidth * .75 + "px";
-		Modal.front.style.minHeight = window.innerHeight * .45 + "px";
-		Modal.front.style.maxHeight = window.innerHeight * .85 + "px";
-		Modal.front.style.display = "flex !important";
-		Modal.front.style.alignItems = "center !important";
-		Modal.front.style.justifyContent = "center !important";
-		Modal.front.style.margin = "0 auto";
-		Modal.front.style.textAlign = Modal.options?.content?.front?.textAlign?.length ? Modal.options.content.front.textAlign : "center";
-		Modal.front.style.overflow = "auto";		
-		Modal.front.style.paddingTop = "1%";
-		Modal.front.style.paddingBottom = "1%";
-		Modal.front.style.paddingRight = "2.5%";
-		Modal.front.style.paddingLeft = "2.5%";
-		Modal.front.style.boxShadow = "0 3px 10px rgb(0 0 0 / 0.2)";
-		Modal.front.style.border = Modal.options?.content?.front?.border?.length ? Modal.options.content.front.border : "";
-		Modal.front.style.borderRadius = Modal.options?.content?.front?.borderRadius?.length ? Modal.options.content.front.borderRadius : 0;
-		Modal.front.style.transition = "all ease .15s";
-		Modal.front.style.wordWrap = "break-word";
+		Modal.front.style = `
+			background-color: ${Modal.options?.content?.front?.backgroundColor ?? "#FFFFEF"};
+			min-width: ${window.innerWidth * .5}px;
+			max-width: ${window.innerWidth * .75}px;
+			min-height: ${window.innerHeight * .45}px;
+			max-height: ${window.innerHeight * .85}px;
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			flex-direction: column !important;
+			margin: 0 auto;
+			text-align: ${Modal.options?.content?.front?.textAlign ?? "center"};
+			overflow: auto;
+			padding: 1% 2.5%;
+			box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+			border: ${Modal.options?.content?.front?.border ?? 0};
+			border-radius: ${Modal.options?.content?.front?.borderRadius ?? 0};
+			transition: all ease .15s;
+			word-wrap: break-word;
+		`;
 		Modal.front.innerHTML = Modal.options?.data || Modal.text;
+	},
 
-		//Botón para cerrar la ventana modal
+	animateFront: _ => {
+		Modal.front.animate([{
+			transform: "scaleY(0)",
+			opacity: 0
+		}, {
+			transform: "scaleY(1)",
+			opacity: 1
+		}], {
+			duration: Modal.animationTime
+		});
+	},
+
+	createClose: _ => {
 		Modal.close = document.createElement("b");
 		Modal.close.classList.add("modalClose");
-		Modal.close.style.position = "fixed";
-		Modal.close.style.fontSize = window.innerWidth < 850 ? ".9rem" : "1.4rem";
-		Modal.close.style.cursor = "pointer";
-		Modal.close.style.color = Modal.options?.content?.close?.color?.length ? Modal.options.content.close.color : "#304145";
-		Modal.close.style.userSelect = "none";
-		Modal.close.style.transition = "all ease .2s";
+		Modal.close.style = `
+			position: fixed;
+			font-size: ${window.innerWidth < 850 ? ".9rem" : "1.4rem"};
+			cursor: pointer;
+			color: ${Modal.options?.content?.close?.color ?? "#304145"};
+			user-select: none;
+			transition: none;
+		`;
 		Modal.close.textContent = "❌";
 		Modal.close.title = "Cerrar esta ventana";
+	},
 
-		//La URL de consulta
+	urlContent: options => {
 		if (options?.url?.length){
 			//La cadena de consulta
 			if (options.query?.length){
@@ -141,114 +272,15 @@ let Modal = {
 				});
 			}
 		}
-
-		//Llamada de retorno a ejecutarse luego de cargar el contenido de la ventana modal
-		Modal.callback = Modal.options?.callback && {}.toString.call(Modal.options?.callback) == "[object Function]" ? Modal.options.callback : false;
-
-		//Llamada de retorno a ejecutarse luego de cerrar la ventana modal
-		Modal.hideCall = Modal.options?.hideCall && {}.toString.call(Modal.options?.hideCall) == "[object Function]" ? Modal.options.hideCall : false;
-
-		//Clases de elementos
-		Modal.clases = ["modalClose", "arrow"];
-		
-		document.addEventListener("mouseover", e => {
-			let elem = e.target;
-
-			Modal.clases.some(clase => {
-				if (elem.classList.contains(clase)){
-					elem.style.transform = "scale(1.2)";
-				}
-			});
-		}, false);
-
-		document.addEventListener("mouseout", e => {
-			let elem = e.target;
-
-			Modal.clases.some(clase => {
-				if (elem.classList.contains(clase)){
-					elem.style.transform = "scale(1)";
-				}
-			});
-		}, false);
-
-		//Se adhiere el botón para cerrar la ventana modal
-		Modal.back.appendChild(Modal.close);
-
-		//Se adhiere el cuadro al fondo
-		if (Modal.options?.newFront){
-			Modal.front = Modal.options.newFront;
-			Modal.front.classList.add("modalFront");
-			Modal.back.insertAdjacentHTML("beforeend", Modal.front);			
-		}
-		else{
-			Modal.back.appendChild(Modal.front);			
-		}
-
-		//Animación para mostrar el contenido central
-		Modal.front.animate([{
-			transform: "scaleY(0)",
-			opacity: 0
-		}, {
-			transform: "scaleY(1)",
-			opacity: 1
-		}], {
-			duration: Modal.animationTime
-		});
-
-		//Se adhiere el fondo al documento
-		document.body.appendChild(Modal.back);
-
-		//Si no se estableció un contenido central alternativo
-		if (Modal.options && !("newFront" in Modal.options)){
-			//Se ejecuta la llamada de retorno en caso haya una
-			Modal.callback && Modal.callback();
-		}
-
-		//Se retiran las barras de desplazamiento del documento
-		document.body.style.overflow = "hidden";
-
-		//Se redimensionan los elementos de la ventana modal
-		setTimeout(Modal.resize, Modal.animationTime);
-
-		//Se recupera la cola de ventanas modales o se inicia una nueva
-		Modal.queue = Modal.queue || [];
-
-		//Se hace una copia de la configuración de la ventana modal
-		let tempModal = {...Modal};
-
-		//Se elimina el encolado de la copia
-		delete tempModal.queue;
-
-		//Se encola la configuración de la ventana modal
-		Modal.queue.push(tempModal);
-
-		//Se cierra la ventana modal al pulsar el fondo oscuro o la X
-		document.addEventListener("click", e => {
-			let elem = e.target, modal;
-
-			//Si se pulsa en el fondo
-			/*if (elem.classList.contains("modalBack")){
-				Modal.hide(elem);
-			}*/
-
-			//Si se pulsa en la X
-			if (elem.classList.contains("modalClose")){
-				Modal.hide(elem.parentNode);
-			}
-		}, false);
-
-		//Cuando se pulse la tecla ESC, se cerrará la ventana modal
-		document.addEventListener("keyup", e => e.which == 27 && Modal.hide(Modal.back), false);
-
-		//Al girar el dispositivo, cambian las dimensiones del fondo
-		window.addEventListener("orientationchange", Modal.resize, false);
-		window.addEventListener("resize", Modal.resize, false);
 	},
 
-	hide: modal => {
-		let modalQueued = {...Modal.queue.find(mod => mod.id == modal.id)},
-			modalQueuedIndex = Modal.queue.findIndex(mod => mod.id == modal.id),
-			front = modal.querySelector(".modalFront");
+	hide: modalConfig => {
+		const modalQueuedIndex = Modal.queue.findIndex(mod => mod.id == modalConfig?.id),
+			  modal = modalConfig?.back,
+			  front = modalConfig?.front;
+
+		//Si no hay ventana modal (el usuario puede haber pulsado la tecla ESC sin que haya ventanas modales presentes), se aborta la ejecución 
+		if (!modal) return;
 
 		//Se oculta la ventana modal con un efecto de animación
 		modal.animate([{
@@ -256,24 +288,21 @@ let Modal = {
 		}, {
 			opacity: 0
 		}], {
-			duration: modalQueued?.animationTime || Modal.animationTime
+			duration: modalConfig.animationTime,
+			fill: "forwards"
 		});
 
 		//Se oculta el contenido central con un efecto de animación
-		if (front){
-			front.animate([{
-				transform: "scaleY(1)",
-				opacity: 1
-			}, {
-				transform: "scaleY(0)",
-				opacity: 0
-			}], {
-				duration: modalQueued?.animationTime || Modal.animationTime
-			});
-		}
-
-		//Se oculta la ventana modal del todo (para evitar el problema del parpadeo)
-		modal.style.opacity = 0;
+		front.animate([{
+			transform: "scaleY(1)",
+			opacity: 1
+		}, {
+			transform: "scaleY(0)",
+			opacity: 0
+		}], {
+			duration: modalConfig.animationTime,
+			fill: "forwards"
+		});
 
 		//Terminado el tiempo de animación se eliminan el fondo y su contenido, se devuelve al documento sus barras de desplazamiento y el valor del comodín vuelve a true
 		setTimeout(_ => {
@@ -281,7 +310,7 @@ let Modal = {
 			modal && modal.remove();	
 
 			//Si ya no otras ventanas modales mostrándose, se restaura la barra de desplazamiento
-			if (!document.querySelectorAll(".modalBack").length){
+			if (!Modal.exists()){
 				document.body.style.overflowY = "auto";
 			}
 			//Si no, se redimensionan las restantes (para prevenir problemas de posicionamiento del botón de cerrado)
@@ -289,55 +318,57 @@ let Modal = {
 				Modal.resize();
 			}			
 
+			//Si hay una llamada de retorno de cierre de ventana, se ejecuta
+			modalConfig.hideCall && modalConfig.hideCall();
+
 			//Se elimina la copia de la ventana modal la cola			
 			Modal.queue.splice(modalQueuedIndex, 1);
-
-			//Si hay una llamada de retorno de cierre de ventana, se ejecuta
-			modalQueued?.hideCall && modalQueued.hideCall();
-		}, modalQueued?.animationTime || Modal.animationTime);
+		}, modalConfig.animationTime);
 	},
 
-	hideAll: _ => [...document.querySelectorAll(".modalBack")].forEach(modal => Modal.hide(modal)),
+	hideAll: _ => Modal.queue.forEach(modalConfig => Modal.hide(modalConfig)),
 
 	exists: _ => document.querySelectorAll(".modalBack"),
 
 	resize: _ => {
-		let front, close;
+		const modalList = Modal.queue;		
+		let back, front, close, closePosition;
 
-		if (!Modal.exists()) return;
+		if (!modalList.length) return;
 
-		[...document.querySelectorAll(".modalBack")].forEach(back => {
-			back.style.width = window.innerWidth + "px";
-			back.style.height = window.innerHeight + "px";
-			back.style.top = (document.documentElement.scrollTop || document.body.scrollTop) + "px";
-		
-			//Contenido central
-			front = back.querySelector(".modalFront");
+		[...modalList].forEach(config => {
+			back = config.back;
+			front = config.front;
+			close = config.close;			
+
+			if (back){
+				back.style.width = `${window.innerWidth}px`;
+				back.style.height = `${window.innerHeight}px`;
+				back.style.top = `${document.documentElement.scrollTop || document.body.scrollTop}px`;
+			}
 		
 			if (front){
-				front.style.minWidth = window.innerWidth * .5 + "px";
-				front.style.maxWidth = window.innerWidth * .75 + "px";
-				front.style.minHeight = window.innerHeight * .45 + "px";
-				front.style.maxHeight = window.innerHeight * .9 + "px";		
+				front.style.minWidth = `${window.innerWidth * .5}px`;
+				front.style.maxWidth = `${window.innerWidth * .75}px`;
+				front.style.minHeight = `${window.innerHeight * .45}px`;
+				front.style.maxHeight = `${window.innerHeight * .9}px`;		
 			}
 
-			//Botón de cerrado
-			close = back.querySelector(".modalClose");
-
 			if (close){
-				close.style.opacity = 0;
-
-				setTimeout(_ => {
-					close.style.top = front.getBoundingClientRect().top * 1.065 + "px";
-					close.style.left = (front.getBoundingClientRect().right - close.getBoundingClientRect().width * (front.scrollHeight > front.clientHeight ? 2 : 1.55)) + "px";
-					close.style.opacity = 1;
-				}, Modal.animationTime);
+				closePosition = _ => {
+					close.style.top = `${front.getBoundingClientRect().top * 1.065}px`;
+					close.style.left = `${front.getBoundingClientRect().right - close.getBoundingClientRect().width * (front.scrollHeight > front.clientHeight ? 2 : 1.55)}px`;
+				};
+				back.addEventListener("transitionend", closePosition, false);
+				back.addEventListener("animationend", closePosition, false);
 			}
 		});
 	},
 
 	getContent: config => {
 		let options;
+
+		if (!config.url) return;
 
 		if (config.query){
 			options = {
@@ -371,8 +402,8 @@ let Modal = {
 					let left = Modal.arrow("left", "<<", "Anterior"),
 						right = Modal.arrow("right", ">>", "Siguiente");
 
-					Modal.back.appendChild(left);
-					Modal.back.appendChild(right);
+					config.back.appendChild(left);
+					config.back.appendChild(right);
 					Modal.resize();
 
 					document.addEventListener("click", e => {
@@ -394,28 +425,30 @@ let Modal = {
 				}				
 			}
 			else{
-				Modal.front.innerHTML = response;
+				config.front.innerHTML = response;
 				Modal.resize();
-				Modal.callback && Modal.callback();
+				config.callback && config.callback();
 			}
 		}).fail(error => Notification.msg(error));
 	},
 
-	arrow: (dir, txt, title) => {
-		let btn = document.createElement("span");
+	arrow: (direction, text, title) => {
+		const button = document.createElement("span");
 
-		btn.style.position = "fixed";
-		btn.style.top = "50%";
-		btn.style[dir] = "1.5%";
-		btn.style.cursor = "pointer";
-		btn.style.color = "white";
-		btn.style.fontWeight = "bold";
-		btn.style.fontSize = "1.5rem";
-		btn.style.userSelect = "none";		
-		btn.classList.add("arrow", dir);
-		btn.title = title;
-		btn.textContent = txt;
+		button.style = `
+			position: fixed;
+			top: 50%;
+			${direction}: 1.5%;
+			cursor: pointer;
+			color: white;
+			font-weight: bold;
+			font-size: 1.5rem;
+			user-select: none;
+		`;	
+		button.classList.add("arrow", direction);
+		button.title = title;
+		button.textContent = text;
 
-		return btn;
+		return button;
 	}
 };
