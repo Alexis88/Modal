@@ -211,10 +211,7 @@ const Modal = {
 			max-width: ${window.innerWidth * .75}px;
 			min-height: ${window.innerHeight * .45}px;
 			max-height: ${window.innerHeight * .85}px;
-			display: flex !important;
-			align-items: center !important;
-			justify-content: center !important;
-			flex-direction: column !important;
+			display: block;
 			margin: 0 auto;
 			text-align: ${Modal.options?.content?.front?.textAlign ?? "center"};
 			overflow: auto;
@@ -255,21 +252,27 @@ const Modal = {
 		Modal.close.title = "Cerrar esta ventana";
 	},
 
-	urlContent: options => {
-		if (options?.url?.length){
-			//La cadena de consulta
-			if (options.query?.length){
-				Modal.getContent({
-					url: options.url, 
-					query: options.query, 
-					error: options.error
-				});
-			}
-			else{
-				Modal.getContent({
-					url: options.url, 
-					error: options.error
-				});
+	urlContent: config => {
+		if (config.options){
+			//Se verifica si se ha proporcionada una ruta de búsqueda
+			if (config.options.url){
+				//Si hay una cadena de consulta, se añade
+				if (config.options.query?.length){
+					Modal.getContent({
+						url: config.options.url, 
+						query: config.options.query, 
+						error: config.options.error ?? null,
+						modal: config
+					});
+				}
+				//Caso contrario, se realiza la consulta solo con la ruta
+				else{
+					Modal.getContent({
+						url: config.options.url, 
+						error: config.options.error ?? null,
+						modal: config
+					});
+				}
 			}
 		}
 	},
@@ -309,20 +312,20 @@ const Modal = {
 			//Si la ventana modal existe, se la elimina del documento
 			modal && modal.remove();	
 
-			//Si ya no otras ventanas modales mostrándose, se restaura la barra de desplazamiento
-			if (!Modal.exists()){
-				document.body.style.overflowY = "auto";
-			}
-			//Si no, se redimensionan las restantes (para prevenir problemas de posicionamiento del botón de cerrado)
-			else{
-				Modal.resize();
-			}			
-
 			//Si hay una llamada de retorno de cierre de ventana, se ejecuta
 			modalConfig.hideCall && modalConfig.hideCall();
 
 			//Se elimina la copia de la ventana modal la cola			
 			Modal.queue.splice(modalQueuedIndex, 1);
+
+			//Si ya no otras ventanas modales mostrándose, se restaura la barra de desplazamiento
+			if (!Modal.queue.length){
+				document.body.style.overflow = "auto";
+			}
+			//Si no, se redimensionan las restantes (para prevenir problemas de posicionamiento del botón de cerrado)
+			else{
+				Modal.resize();
+			}			
 		}, modalConfig.animationTime);
 	},
 
@@ -355,20 +358,17 @@ const Modal = {
 			}
 
 			if (close){
-				closePosition = _ => {
+				setTimeout(_ => {
 					close.style.top = `${front.getBoundingClientRect().top * 1.065}px`;
 					close.style.left = `${front.getBoundingClientRect().right - close.getBoundingClientRect().width * (front.scrollHeight > front.clientHeight ? 2 : 1.55)}px`;
-				};
-				back.addEventListener("transitionend", closePosition, false);
-				back.addEventListener("animationend", closePosition, false);
+				}, config.animationTime);
 			}
 		});
 	},
 
 	getContent: config => {
 		let options;
-
-		if (!config.url) return;
+		const modalConfig = config.modal;
 
 		if (config.query){
 			options = {
@@ -402,8 +402,8 @@ const Modal = {
 					let left = Modal.arrow("left", "<<", "Anterior"),
 						right = Modal.arrow("right", ">>", "Siguiente");
 
-					config.back.appendChild(left);
-					config.back.appendChild(right);
+					modalConfig.back.appendChild(left);
+					modalConfig.back.appendChild(right);
 					Modal.resize();
 
 					document.addEventListener("click", e => {
@@ -425,9 +425,9 @@ const Modal = {
 				}				
 			}
 			else{
-				config.front.innerHTML = response;
+				modalConfig.front.innerHTML = response;
 				Modal.resize();
-				config.callback && config.callback();
+				modalConfig.callback && modalConfig.callback();
 			}
 		}).fail(error => Notification.msg(error));
 	},
