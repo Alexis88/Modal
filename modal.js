@@ -1,454 +1,293 @@
 /**
  * VENTANA MODAL PERSONALIZADA
  * 
- * Este script genera una ventana modal en el que se puede mostrar contenido de cualquier tipo, sea texto 
- * plano, multimedia o cargar el contenido de otra página.
- *
- * Se emplearon los archivos ajax.js y notification.js, listados en el repositorio.
- * Pueden ser encontrados aquí: https://github.com/Alexis88?tab=repositories
+ * Plugin que genera una ventana modal personalizada
  * 
- *
- * MODO DE USO: Modal.show("Texto a mostrar"/{Objeto de opciones de configuración}); 
+ * MODO DE USO:
  * 
- *
+ * Modal.show("Texto de ejemplo");
+ * Modal.show({
+ *		text: "Texto de ejemplo",
+ * 		url: "ejemplo.php",
+ * 		data: "foo=bar&bin=baz" o {foo: "bar", bin: "baz"},
+ * 		onShow: _ => {
+ * 			//Esto se ejecutará luego de haber cargado la ventana modal
+ * 		},
+ * 		onHide: _ => {
+ * 			//Esto se ejecutará luego de haberse cerrado la ventana modal
+ * 		},
+ *		onError: _ => {
+ * 			//Esto se ejecutará cuando ocurra un error en la carga de un contenido externo
+ * 		},
+ * 		css: {
+ * 			front: `
+ * 				background-color: #A3F7C9;
+ * 				color: #92B8F8;
+ * 				font-weight: bold;
+ * 				border: 1px #A991FF dotted;
+ * 				border-radius: 1rem;
+ * 			`,
+ * 			close: `
+ * 				color: #000;
+ * 			`
+ * 		}
+ * });
+ * 
+ * @param		{options}				Object/String
  * @author		Alexis López Espinoza
- * @version		2.0
- * @param		options			Plain Object/String
+ * @version		1.0
+ * @date 		2023-06-04
  */
 
 "use strict";
 
 const Modal = {
-	show: options => {
-		/*** OPCIONES DE CONFIGURACIÓN ***
-		 * 
-		 * options.data: El contenido plano a mostrarse
-		 * options.url: URL de la cual se obtendrá el contenido
-		 * options.query: Cadena de consulta para adjuntar a la URL
-		 * options.error: Llamada de retorno a ejecutarse si ocurre un error en la carga de un contenido externo
-		 * options.newFront: Cuadro que se mostrará en lugar de la ventana modal
-		 * options.callback: Llamada de retorno a ejecutarse luego de la carga del contenido de la ventana modal
-		 * options.hideCall: Llamada de retorno a ejecutarse luego de cerrar la ventana modal
-		 * options.content: Objeto con propiedades CSS para personalizar los elementos de la ventana modal
-		 * options.time: Duración de la animación para mostrar y ocultar la ventana modal
-		 */
+	/**
+	 * options.text: Texto a mostrar
+	 * options.url: URL a consultar para obtener el contenido a mostrar
+	 * options.data: Datos a adjuntar a la URL a consultar
+	 * onShow: Llamada de retorno a ejecutarse luego de mostrarse la ventana modal
+	 * onHide: Llamada de retorno a ejecutarse luego de cerrarse la ventana modal
+	 * onError: Llamada de retorno a ejecutarse luego de producirse un error al ejecutar la consulta a la URL
+	 * css: {
+	 * 		front: {Estilos CSS para el contenido central},
+	 * 		close: {Estilos CSS para el botón de cerrado}
+	 * }
+	 */
+	show(options){
+		if (!options || !["[object String]", "[object Object]"].includes(Modal.type(options))){
+			throw new Error("Tiene que establecer un contenido para la ventana modal");
+		}
 
-		//Se libera la memoria ocupada por la configuración anterior (si hubo una)
-		delete Modal.options;
-
-		//ID de la ventana modal
 		Modal.id = `modalID-${new Date().getTime()}`;
 
-		//Si se recibió argumentos
-		if (options){
-			//Si el argumento no es un objeto, se lo establece como el texto a mostrar
-			if ({}.toString.call(options) !== "[object Object]"){
-				Modal.text = options;
-			}
-			//Si el argumento es un objeto, se lo establece como configuración de la ventana modal
-			else{
-				Modal.options = options;
-				Modal.text = options.data;
-			}
-		}
-		//Caso contrario, se aborta la ejecución
-		else{
-			throw new Error("Tiene que añadir un texto o un objeto con opciones de configuración para poder mostrar la ventana modal");
-		}
-
-		//El fondo
-		Modal.createBack();
-
-		//Duración de la animación para mostrar y ocultar la ventana modal
-		Modal.animationTime = Modal.options?.time || 400;
-
-		//Animación para mostrar la ventana modal
-		Modal.animateBack();
-
-		//Cuadro que mostrará el texto y/o imágenes
-		Modal.createFront();
-
-		//Botón para cerrar la ventana modal
-		Modal.createClose();
-
-		//Llamada de retorno a ejecutarse luego de cargar el contenido de la ventana modal
-		Modal.callback = Modal.options?.callback && {}.toString.call(Modal.options?.callback) == "[object Function]" ? Modal.options.callback : false;
-
-		//Llamada de retorno a ejecutarse luego de cerrar la ventana modal
-		Modal.hideCall = Modal.options?.hideCall && {}.toString.call(Modal.options?.hideCall) == "[object Function]" ? Modal.options.hideCall : false;
-
-		//Clases de elementos
-		Modal.clases = ["modalClose", "arrow"];		
-
-		//Se adhiere el botón para cerrar la ventana modal
-		Modal.back.appendChild(Modal.close);
-
-		//Se adhiere el cuadro al fondo
-		if (Modal.options?.newFront){
-			Modal.front = Modal.options.newFront;
-			Modal.front.classList.add("modalFront");
-			Modal.back.insertAdjacentHTML("beforeend", Modal.front);			
+		if (Modal.type(options) == "[object String]"){
+			Modal.text = options;			
 		}
 		else{
-			Modal.back.appendChild(Modal.front);			
+			Modal.text = options.text;
+			Modal.url = options.url || false;
+			Modal.data = options.data || false;
+			Modal.onShow = options.onShow && Modal.isFunction(options.onShow) ? options.onShow : null;
+			Modal.onHide = options.onHide && Modal.isFunction(options.onHide) ? options.onHide : null;
+			Modal.onError = options.onError && Modal.isFunction(options.onError) ? options.onError : null;
+			Modal.css = options.css || null;
 		}
 
-		//Animación para mostrar el contenido central
-		Modal.animateFront();
-
-		//Se hace una copia de la configuración de la ventana modal
-		const config = {...Modal};
-
-		//La URL de consulta
-		Modal.urlContent(config);
-
-		//Se adhiere el fondo al documento
-		document.body.appendChild(config.back);
-
-		//Si no se estableció un contenido central alternativo
-		if (!config.options?.newFront){
-			//Se ejecuta la llamada de retorno en caso haya una
-			config.callback && config.callback();
-		}
-
-		//Se retiran las barras de desplazamiento del documento
-		document.body.style.overflow = "hidden";
-
-		//Se redimensionan los elementos de la ventana modal
-		setTimeout(Modal.resize, config.animationTime);
-
-		//Se recupera la cola de ventanas modales o se inicia una nueva
-		Modal.queue = Modal.queue || [];		
-
-		//Se encola la configuración de la ventana modal
-		Modal.queue.push(config);
-
-		//Configuración de eventos
-		Modal.events(config);
+		Modal.queue = Modal.queue || [];
+		Modal.createModal();
+		Modal.getContent();
+		const cloneConfig = {...Modal};
+		Modal.queue.push(cloneConfig);
+		Modal.events(cloneConfig);
 	},
 
-	events: modalConfig => {
-		//Se cierra la ventana modal al pulsar el fondo oscuro o la X
-		modalConfig.close.addEventListener("click", _ => Modal.hide(modalConfig), false);
+	type(elem){
+		return {}.toString.call(elem);
+	},
 
-		//Se aplica un efecto de transición en el botón de cerrado cuando se posa el cursor sobre él
-		modalConfig.close.addEventListener("mouseover", _ => modalConfig.close.style.transition = ".4s ease", false);
+	isFunction(fn){
+		return Modal.type(fn) === "[object Function]";
+	},
 
-		//Se elimina el efecto de transición del botón de cerrado al retirar el cursor de él
-		modalConfig.close.addEventListener("mouseout", _ => setTimeout(_ => modalConfig.close.style.transition = "none", 400), false);
-
-		document.addEventListener("mouseover", e => {
-			const elem = e.target;
-
-			Modal.clases.some(clase => {
-				if (elem.classList.contains(clase)){
-					elem.style.transform = "scale(1.2)";
-				}
-			});
+	events(config){
+		config.close.addEventListener("click", _ => Modal.hide(config), false);
+		config.close.addEventListener("mouseover", _ => {
+			config.close.style.transition = "ease .4s";
+			config.close.style.cursor = "pointer";
+			config.close.style.transform = "scale(1.1)";
 		}, false);
-
-		document.addEventListener("mouseout", e => {
-			const elem = e.target;
-
-			Modal.clases.some(clase => {
-				if (elem.classList.contains(clase)){
-					elem.style.transform = "scale(1)";
-				}
-			});
+		config.close.addEventListener("mouseout", _ => {
+			config.close.style.transition = "none";
+			config.close.style.cursor = "auto";
+			config.close.style.transform = "scale(1)";
 		}, false);
-
-		//Cuando se pulse la tecla ESC, se cerrará la ventana modal
-		document.addEventListener("keyup", e => {
-			const list = Modal.queue;
-
-			if (e.which == 27){
-				Modal.hide(list[list.length - 1]);
+		window.addEventListener("keyup", e => {
+			if (e.which == 27 && Modal.queue.length){
+				Modal.hide(Modal.queue[Modal.queue.length - 1]);
 				e.stopImmediatePropagation();
 			}
 		}, false);
-
-		//Al girar el dispositivo, cambian las dimensiones del fondo
-		window.addEventListener("orientationchange", Modal.resize, false);
 		window.addEventListener("resize", Modal.resize, false);
+		window.addEventListener("orientationchange", Modal.resize, false);
 	},
 
-	createBack: _ => {
-		Modal.back = document.createElement("div");		
-		Modal.back.id = Modal.id;
-		Modal.back.classList.add("modalBack");
-		Modal.back.style = `
+	createModal(){
+		const 
+			back = document.createElement("div"),
+			front = document.createElement("div"),
+			close = document.createElement("span"),
+			width = window.innerWidth,
+			height = window.innerHeight;
+
+		back.style = `
+			position: absolute;
+			background-color: rgba(0, 0, 0, .6);
+			display: flex;
+			align-items: center;
 			width: ${window.innerWidth}px;
 			height: ${window.innerHeight}px;
-			background-color: rgba(0, 0, 0, .6);
-			top: ${document.documentElement.scrollTop || document.body.scrollTop}px;
+			top: 0;
 			left: 0;
-			margin: 0;
-			position: absolute;
+			justify-content: center;
+			z-index: 8888;
+			transition: all ease .4s;
+		`;
+		back.animate([
+			{opacity: 0},
+			{opacity: .6}
+		], {duration: 400});
+
+		front.style = `
+			position: fixed;
+			min-width: ${width * (width < 850 ? .4 : .5)}px;
+			max-width: ${width * (width < 850 ? .8 : .7)}px;
+			min-height: ${height * (height < 850 ? .5 : .65)}px;
+			max-height: ${height * (height < 850 ? .75 : .85)}px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			z-index: 8888;
-			transition: all ease .15s;
-		`;
-	},
-
-	animateBack: _ => {
-		Modal.back.animate([{
-			opacity: 0
-		}, {
-			opacity: 1
-		}], {
-			duration: Modal.animationTime
-		});
-	},
-
-	createFront: _ => {
-		Modal.front = document.createElement("div");
-		Modal.front.classList.add("modalFront");
-		Modal.front.style = `
-			background-color: ${Modal.options?.content?.front?.backgroundColor ?? "#FFFFEF"};
-			min-width: ${window.innerWidth * .5}px;
-			max-width: ${window.innerWidth * .75}px;
-			min-height: ${window.innerHeight * .45}px;
-			max-height: ${window.innerHeight * .85}px;
-			display: block;
-			margin: 0 auto;
-			text-align: ${Modal.options?.content?.front?.textAlign ?? "center"};
-			overflow: auto;
+			flex-direction: column;
 			padding: 1% 2.5%;
 			box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
-			border: ${Modal.options?.content?.front?.border ?? 0};
-			border-radius: ${Modal.options?.content?.front?.borderRadius ?? 0};
-			transition: all ease .15s;
 			word-wrap: break-word;
+			overflow: auto;
+			z-index: 9999;
+			transition: all ease .4s;
+			background-color: ${Modal.css?.front?.backgroundColor ?? "#FFFFEF"};
+			border: ${Modal.css?.front?.border ?? "1px grey solid"};
+			border-radius: ${Modal.css?.front?.borderRadius ?? 0};
+			text-align: ${Modal.css?.front?.textAlign ?? "#000"};
+			font-weight: ${Modal.css?.front?.fontWeight ?? "normal"};
 		`;
-		Modal.front.innerHTML = Modal.options?.data || Modal.text;
-	},
+		front.animate([
+			{transform: "scaleY(0)"},
+			{transform: "scaleY(1)"}
+		], {duration: 400});
+		
+		if (Modal.text){
+			if (Modal.type(Modal.text) === "[object String]"){
+				front.innerHTML = Modal.text;
+			}
+			else{
+				front.append(Modal.text);
+			}
+		}
+		else{
+			Modal.getContent(Modal);
+		}
 
-	animateFront: _ => {
-		Modal.front.animate([{
-			transform: "scaleY(0)",
-			opacity: 0
-		}, {
-			transform: "scaleY(1)",
-			opacity: 1
-		}], {
-			duration: Modal.animationTime
-		});
-	},
-
-	createClose: _ => {
-		Modal.close = document.createElement("b");
-		Modal.close.classList.add("modalClose");
-		Modal.close.style = `
+		close.style = `
 			position: fixed;
-			font-size: ${window.innerWidth < 850 ? ".9rem" : "1.4rem"};
-			cursor: pointer;
-			color: ${Modal.options?.content?.close?.color ?? "#304145"};
 			user-select: none;
-			transition: none;
+			opacity: 0;
+			z-index: 9999;
+			color: ${Modal.css?.close?.color ?? "#000"};
 		`;
-		Modal.close.textContent = "❌";
-		Modal.close.title = "Cerrar esta ventana";
+		close.textContent = "❌";
+		close.title = "Cerrar esta ventana";
+
+		Modal.back = back;
+		Modal.front = front;
+		Modal.close = close;	
+
+		back.append(front, close);
+		document.body.append(back);
+
+		setTimeout(_ => {
+			Modal.onShow && Modal.onShow();
+			Modal.resize();
+		}, 400);
 	},
 
-	urlContent: config => {
-		if (config.options){
-			//Se verifica si se ha proporcionada una ruta de búsqueda
-			if (config.options.url){
-				//Si hay una cadena de consulta, se añade
-				if (config.options.query?.length){
-					Modal.getContent({
-						url: config.options.url, 
-						query: config.options.query, 
-						error: config.options.error ?? null,
-						modal: config
-					});
-				}
-				//Caso contrario, se realiza la consulta solo con la ruta
-				else{
-					Modal.getContent({
-						url: config.options.url, 
-						error: config.options.error ?? null,
-						modal: config
-					});
+	getContent(){
+		if (Modal.url){
+			let url = Modal.url, data;
+
+			if (Modal.data){
+				switch (Modal.type(Modal.data)){
+					case "[object String]":
+						url += `?${Modal.data}`;
+						break;
+
+					case "[object Object]":
+						data = [];
+						for (const key in Modal.data){
+							data.push(`${key}=${Modal.data[key]}`);
+						}
+						url += `?${data.join("&")}`;
+						break;
 				}
 			}
+
+			fetch(url)
+				.then(response => response.text())
+				.then(content => Modal.front.innerHTML = content)
+				.catch(error => Modal.onError(error));
 		}
 	},
 
-	hide: modalConfig => {
-		const modalQueuedIndex = Modal.queue.findIndex(mod => mod.id == modalConfig?.id),
-			  modal = modalConfig?.back,
-			  front = modalConfig?.front;
+	resize(){
+		Modal.queue.forEach(config => {
+			const
+				back = config.back,
+				front = config.front,
+				close = config.close,
+				scroll = document.documentElement.scrollTop || document.body.scrollTop,
+				width = window.innerWidth,
+				height = window.innerHeight;
 
-		//Si no hay ventana modal (el usuario puede haber pulsado la tecla ESC sin que haya ventanas modales presentes), se aborta la ejecución 
-		if (!modal) return;
+			let isScrollVisible;
 
-		//Se oculta la ventana modal con un efecto de animación
-		modal.animate([{
-			opacity: 1
-		}, {
-			opacity: 0
-		}], {
-			duration: modalConfig.animationTime,
-			fill: "forwards"
+			back.style.top = `${scroll}px`;
+			back.style.width = `${width}px`;
+			back.style.height = `${height}px`;
+
+			front.style.minWidth = `${width * (width < 850 ? .4 : .5)}px`;
+			front.style.maxWidth = `${width * (width < 850 ? .8 : .7)}px`;
+			front.style.minHeight = `${height * (height < 850 ? .5 : .65)}px`;
+			front.style.maxHeight = `${height * (height < 850 ? .75 : .85)}px`;
+
+			close.style.opacity = 0;
+
+			setTimeout(_ => {
+				console.log(config.id)
+				isScrollVisible = front.scrollHeight > front.clientHeight;
+				close.style.top = `${front.getBoundingClientRect().top + 4}px`;
+				close.style.left = `${front.getBoundingClientRect().right - (close.offsetWidth * (isScrollVisible ? 2 : 1.5))}px`;
+				close.style.opacity = 1;
+			}, 400);
 		});
+	},
 
-		//Se oculta el contenido central con un efecto de animación
-		front.animate([{
-			transform: "scaleY(1)",
-			opacity: 1
-		}, {
-			transform: "scaleY(0)",
-			opacity: 0
-		}], {
-			duration: modalConfig.animationTime,
-			fill: "forwards"
-		});
+	hide(config){
+		const 
+			back = config.back,
+			front = config.front,
+			index = Modal.queue.findIndex(modalConfig => modalConfig.id == config.id);
 
-		//Terminado el tiempo de animación se eliminan el fondo y su contenido, se devuelve al documento sus barras de desplazamiento y el valor del comodín vuelve a true
+		back.animate([
+			{opacity: .6},
+			{opacity: 1}
+		], {duration: 400, fill: "forwards"});
+
+		front.animate([
+			{transform: "scaleY(1)"},
+			{transform: "scaleY(0)"}
+		], {duration: 400, fill: "forwards"});
+
 		setTimeout(_ => {
-			//Si la ventana modal existe, se la elimina del documento
-			modal && modal.remove();	
+			back.remove();
+			front.remove();
+			config.onHide && config.onHide();
+			Modal.queue.splice(index, 1);
 
-			//Si hay una llamada de retorno de cierre de ventana, se ejecuta
-			modalConfig.hideCall && modalConfig.hideCall();
-
-			//Se elimina la copia de la ventana modal la cola			
-			Modal.queue.splice(modalQueuedIndex, 1);
-
-			//Si ya no otras ventanas modales mostrándose, se restaura la barra de desplazamiento
 			if (!Modal.queue.length){
 				document.body.style.overflow = "auto";
 			}
-			//Si no, se redimensionan las restantes (para prevenir problemas de posicionamiento del botón de cerrado)
 			else{
 				Modal.resize();
-			}			
-		}, modalConfig.animationTime);
-	},
-
-	hideAll: _ => Modal.queue.forEach(modalConfig => Modal.hide(modalConfig)),
-
-	exists: _ => document.querySelectorAll(".modalBack"),
-
-	resize: _ => {
-		const modalList = Modal.queue;		
-		let back, front, close, closePosition;
-
-		if (!modalList.length) return;
-
-		[...modalList].forEach(config => {
-			back = config.back;
-			front = config.front;
-			close = config.close;			
-
-			if (back){
-				back.style.width = `${window.innerWidth}px`;
-				back.style.height = `${window.innerHeight}px`;
-				back.style.top = `${document.documentElement.scrollTop || document.body.scrollTop}px`;
 			}
-		
-			if (front){
-				front.style.minWidth = `${window.innerWidth * .5}px`;
-				front.style.maxWidth = `${window.innerWidth * .75}px`;
-				front.style.minHeight = `${window.innerHeight * .45}px`;
-				front.style.maxHeight = `${window.innerHeight * .9}px`;		
-			}
-
-			if (close){
-				setTimeout(_ => {
-					close.style.top = `${front.getBoundingClientRect().top * 1.065}px`;
-					close.style.left = `${front.getBoundingClientRect().right - close.getBoundingClientRect().width * (front.scrollHeight > front.clientHeight ? 2 : 1.55)}px`;
-				}, config.animationTime);
-			}
-		});
-	},
-
-	getContent: config => {
-		let options;
-		const modalConfig = config.modal;
-
-		if (config.query){
-			options = {
-				url: config.url,
-				data: {
-					id: config.query
-				},
-				type: "json"
-			};
-		}
-		else{
-			options = {
-				url: config.url
-			};
-		}
-
-		Ajax(options).done(response => {
-			if (config.error && {}.toString.call(config.error) === "[object Function]"){
-				if (config.error(response)){
-					return;
-				}
-			}
-
-			if ("type" in options && response.length){
-				let content = response,
-					count = 0,
-					total = content.length,
-					img = document.querySelector(".modalClose").nextElementSibling;
-
-				if (total > 1){
-					let left = Modal.arrow("left", "<<", "Anterior"),
-						right = Modal.arrow("right", ">>", "Siguiente");
-
-					modalConfig.back.appendChild(left);
-					modalConfig.back.appendChild(right);
-					Modal.resize();
-
-					document.addEventListener("click", e => {
-						let elem = e.target;
-
-						if (elem.classList.contains("arrow")){
-							if (elem.classList.contains("left")){
-								count = count - 1 < 0 ? total - 1 : count - 1;
-								img.src = content[count];
-							}
-
-							if (elem.classList.contains("right")){
-								count = count + 1 == total ? 0 : count + 1;
-								img.src = content[count];
-							}
-						}
-
-					}, false);
-				}				
-			}
-			else{
-				modalConfig.front.innerHTML = response;
-				Modal.resize();
-				modalConfig.callback && modalConfig.callback();
-			}
-		}).fail(error => Notification.msg(error));
-	},
-
-	arrow: (direction, text, title) => {
-		const button = document.createElement("span");
-
-		button.style = `
-			position: fixed;
-			top: 50%;
-			${direction}: 1.5%;
-			cursor: pointer;
-			color: white;
-			font-weight: bold;
-			font-size: 1.5rem;
-			user-select: none;
-		`;	
-		button.classList.add("arrow", direction);
-		button.title = title;
-		button.textContent = text;
-
-		return button;
+		}, 400);
 	}
 };
