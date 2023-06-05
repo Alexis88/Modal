@@ -66,7 +66,7 @@ const Modal = {
 				Modal.text = options;			
 			}
 			else{
-				Modal.text = options.text;
+				Modal.text = options.text || "";
 				Modal.url = options.url || false;
 				Modal.data = options.data || false;
 				Modal.onShow = options.onShow && Modal.isFunction(options.onShow) ? options.onShow : null;
@@ -121,6 +121,7 @@ const Modal = {
 		Modal.addContent(cloneConfig);
 		cloneConfig.back.append(cloneConfig.front, cloneConfig.close);
 		document.body.append(cloneConfig.back);
+		document.body.style.overflow = "hidden";
 
 		setTimeout(_ => {
 			cloneConfig.onShow && cloneConfig.onShow();
@@ -133,6 +134,7 @@ const Modal = {
 	createBack(){
 		const 
 			back = document.createElement("div"),
+			scroll = document.documentElement.scrollTop || document.body.scrollTop,
 			width = window.innerWidth,
 			height = window.innerHeight;
 
@@ -144,7 +146,7 @@ const Modal = {
 			align-items: center;
 			width: ${width}px;
 			height: ${height}px;
-			top: 0;
+			top: ${scroll}px;
 			left: 0;
 			justify-content: center;
 			z-index: 8888;
@@ -176,7 +178,7 @@ const Modal = {
 			align-items: center;
 			justify-content: center;
 			flex-direction: column;
-			padding: 1% 2.5%;
+			padding: .5% 2.5%;
 			box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
 			word-wrap: break-word;
 			overflow: auto;
@@ -187,7 +189,7 @@ const Modal = {
 			background-color: ${Modal.css?.front?.backgroundColor ?? "#FFFFEF"};
 			border: ${Modal.css?.front?.border ?? "1px grey solid"};
 			border-radius: ${Modal.css?.front?.borderRadius ?? 0};
-			text-align: ${Modal.css?.front?.textAlign ?? "#000"};
+			text-align: ${Modal.css?.front?.textAlign ?? "center"};
 			font-weight: ${Modal.css?.front?.fontWeight ?? "normal"};
 		`;
 
@@ -224,36 +226,42 @@ const Modal = {
 				config.front.append(config.text);
 			}
 		}
-		else{
+		
+		if (config.url){
 			Modal.getContent(config);
 		}
 	},
 
 	getContent(config){
-		if (config.url){
-			let url = config.url, data;
+		let url = config.url, data;
 
-			if (config.data){
-				switch (Modal.type(config.data)){
-					case "[object String]":
-						url += `?${config.data}`;
-						break;
+		if (config.data){
+			switch (Modal.type(config.data)){
+				case "[object String]":
+					url += `?${config.data}`;
+					break;
 
-					case "[object Object]":
-						data = [];
-						for (const key in config.data){
-							data.push(`${key}=${config.data[key]}`);
-						}
-						url += `?${data.join("&")}`;
-						break;
-				}
+				case "[object Object]":
+					data = [];
+					for (const key in config.data){
+						data.push(`${key}=${config.data[key]}`);
+					}
+					url += `?${data.join("&")}`;
+					break;
 			}
-
-			fetch(url)
-				.then(response => response.text())
-				.then(content => config.front.innerHTML = content)
-				.catch(error => config.onError(error));
 		}
+
+		fetch(url)
+			.then(response => {
+				if (response.ok){
+					return response.text();
+				}
+				else{
+					config.onError(response.status)
+				}
+			})
+			.then(content => config.front.innerHTML = content)
+			.catch(error => config.onError(error));
 	},
 
 	resize(){
