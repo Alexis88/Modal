@@ -59,27 +59,26 @@ const Modal = {
 			throw new Error("Tiene que establecer un contenido para la ventana modal");
 		}
 
-		Modal.id = `modalID-${new Date().getTime()}`;
+		setTimeout(_ => {
+			Modal.id = `modalID-${new Date().getTime()}`;
 
-		if (Modal.type(options) == "[object String]"){
-			Modal.text = options;			
-		}
-		else{
-			Modal.text = options.text;
-			Modal.url = options.url || false;
-			Modal.data = options.data || false;
-			Modal.onShow = options.onShow && Modal.isFunction(options.onShow) ? options.onShow : null;
-			Modal.onHide = options.onHide && Modal.isFunction(options.onHide) ? options.onHide : null;
-			Modal.onError = options.onError && Modal.isFunction(options.onError) ? options.onError : null;
-			Modal.css = options.css || null;
-		}
+			if (Modal.type(options) == "[object String]"){
+				Modal.text = options;			
+			}
+			else{
+				Modal.text = options.text;
+				Modal.url = options.url || false;
+				Modal.data = options.data || false;
+				Modal.onShow = options.onShow && Modal.isFunction(options.onShow) ? options.onShow : null;
+				Modal.onHide = options.onHide && Modal.isFunction(options.onHide) ? options.onHide : null;
+				Modal.onError = options.onError && Modal.isFunction(options.onError) ? options.onError : null;
+				Modal.css = options.css || null;
+			}
 
-		Modal.queue = Modal.queue || [];
-		Modal.createModal();
-		Modal.getContent();
-		const cloneConfig = {...Modal};
-		Modal.queue.push(cloneConfig);
-		Modal.events(cloneConfig);
+			Modal.queue ??= [];
+			const cloneConfig = Modal.createModal();
+			Modal.events(cloneConfig);
+		}, 100);
 	},
 
 	type(elem){
@@ -103,41 +102,67 @@ const Modal = {
 			config.close.style.transform = "scale(1)";
 		}, false);
 		window.addEventListener("keyup", e => {
-			if (e.which == 27 && Modal.queue.length){
-				Modal.hide(Modal.queue[Modal.queue.length - 1]);
-				e.stopImmediatePropagation();
-			}
+			e.which == 27 && Modal.queue.length && Modal.hide();
+			e.stopImmediatePropagation();
 		}, false);
 		window.addEventListener("resize", Modal.resize, false);
 		window.addEventListener("orientationchange", Modal.resize, false);
 	},
 
 	createModal(){
+		Modal.back = Modal.createBack();
+		Modal.front = Modal.createFront();
+		Modal.close = Modal.createClose();
+		const cloneConfig = {...Modal};
+		delete cloneConfig.queue;
+		Modal.queue.push(cloneConfig);
+		cloneConfig.back.append(cloneConfig.front, cloneConfig.close);
+		document.body.append(cloneConfig.back);
+
+		setTimeout(_ => {
+			cloneConfig.onShow && cloneConfig.onShow();
+			Modal.resize();
+		}, 400);
+
+		return cloneConfig;
+	},
+
+	createBack(){
 		const 
 			back = document.createElement("div"),
-			front = document.createElement("div"),
-			close = document.createElement("span"),
 			width = window.innerWidth,
 			height = window.innerHeight;
 
+		back.id = `modalBack-${Modal.id}`;
 		back.style = `
 			position: absolute;
 			background-color: rgba(0, 0, 0, .6);
 			display: flex;
 			align-items: center;
-			width: ${window.innerWidth}px;
-			height: ${window.innerHeight}px;
+			width: ${width}px;
+			height: ${height}px;
 			top: 0;
 			left: 0;
 			justify-content: center;
 			z-index: 8888;
 			transition: all ease .4s;
 		`;
+
 		back.animate([
 			{opacity: 0},
 			{opacity: .6}
 		], {duration: 400});
 
+		return back;
+	},
+
+	createFront(){
+		const
+			front = document.createElement("div"),
+			width = window.innerWidth,
+			height = window.innerHeight;
+
+		front.id = `modalFront-${Modal.id}`;
 		front.style = `
 			position: fixed;
 			min-width: ${width * (width < 850 ? .4 : .5)}px;
@@ -160,11 +185,12 @@ const Modal = {
 			text-align: ${Modal.css?.front?.textAlign ?? "#000"};
 			font-weight: ${Modal.css?.front?.fontWeight ?? "normal"};
 		`;
+
 		front.animate([
 			{transform: "scaleY(0)"},
 			{transform: "scaleY(1)"}
 		], {duration: 400});
-		
+
 		if (Modal.text){
 			if (Modal.type(Modal.text) === "[object String]"){
 				front.innerHTML = Modal.text;
@@ -174,8 +200,14 @@ const Modal = {
 			}
 		}
 		else{
-			Modal.getContent(Modal);
+			Modal.getContent();
 		}
+
+		return front;
+	},
+
+	createClose(){
+		const close = document.createElement("span");
 
 		close.style = `
 			position: fixed;
@@ -187,17 +219,7 @@ const Modal = {
 		close.textContent = "❌";
 		close.title = "Cerrar esta ventana";
 
-		Modal.back = back;
-		Modal.front = front;
-		Modal.close = close;	
-
-		back.append(front, close);
-		document.body.append(back);
-
-		setTimeout(_ => {
-			Modal.onShow && Modal.onShow();
-			Modal.resize();
-		}, 400);
+		return close;
 	},
 
 	getContent(){
@@ -260,14 +282,26 @@ const Modal = {
 	},
 
 	hide(config){
-		const 
+		var queue, index, back, front;
+
+		//Cuando se oculta la ventana modal pulsando la tecla ESC
+		if (!config){
+			queue = [...Modal.queue];
+			index = queue.length - 1;
+			config = queue[index];
 			back = config.back,
-			front = config.front,
-			index = Modal.queue.findIndex(modalConfig => modalConfig.id == config.id);
+			front = config.front;
+		}
+		//Cuando se oculta la ventana modal pulsando el botón de cerrado
+		else{
+			back = config.back;
+			front = config.front;
+			index = Modal.queue.findIndex(obj => obj.id == config.id);
+		}
 
 		back.animate([
 			{opacity: .6},
-			{opacity: 1}
+			{opacity: 0}
 		], {duration: 400, fill: "forwards"});
 
 		front.animate([
@@ -275,18 +309,43 @@ const Modal = {
 			{transform: "scaleY(0)"}
 		], {duration: 400, fill: "forwards"});
 
+		Modal.queue.splice(index, 1);
+
+		if (!Modal.queue.length){
+			document.body.style.overflow = "auto";
+		}
+		else{
+			Modal.resize();
+		}
+
 		setTimeout(_ => {
 			back.remove();
 			front.remove();
-			config.onHide && config.onHide();
-			Modal.queue.splice(index, 1);
-
-			if (!Modal.queue.length){
-				document.body.style.overflow = "auto";
-			}
-			else{
-				Modal.resize();
-			}
+			config.onHide && config.onHide();			
 		}, 400);
+	},
+
+	hideAll(){
+		[...document.querySelectorAll("[id^=modalBack-]")].forEach(back => {
+			const front = back.querySelector("[id^=modalFront-]");
+
+			back.animate([
+				{opacity: .6},
+				{opacity: 0}
+			], {duration: 400, fill: "forwards"});
+
+			front.animate([
+				{transform: "scaleY(1)"},
+				{transform: "scaleY(0)"}
+			], {duration: 400, fill: "forwards"});
+
+			setTimeout(_ => {
+				back.remove();
+				front.remove();				
+			}, 400);
+		});
+
+		document.body.style.overflow = "auto";
+		Modal.queue = [];
 	}
 };
