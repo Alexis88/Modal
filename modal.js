@@ -20,16 +20,16 @@
  * 			//Esto se ejecutará cuando ocurra un error en la carga de un contenido externo
  * 		},
  * 		css: {
- * 			front: `
- * 				background-color: #A3F7C9;
- * 				color: #92B8F8;
- * 				font-weight: bold;
- * 				border: 1px #A991FF dotted;
- * 				border-radius: 1rem;
- * 			`,
- * 			close: `
- * 				color: #000;
- * 			`
+ * 			front: {
+ * 				backgroundColor: "#A3F7C9",
+ * 				color: "#92B8F8",
+ * 				fontWeight: "bold",
+ * 				border: "1px #A991FF dotted",
+ * 				borderRadius: "1rem"
+ * 			},
+ * 			close: {
+ * 				color: "#000";
+ * 			}
  * 		}
  * });
  * 
@@ -113,9 +113,12 @@ const Modal = {
 		Modal.back = Modal.createBack();
 		Modal.front = Modal.createFront();
 		Modal.close = Modal.createClose();
+
 		const cloneConfig = {...Modal};
 		delete cloneConfig.queue;
 		Modal.queue.push(cloneConfig);
+
+		Modal.addContent(cloneConfig);
 		cloneConfig.back.append(cloneConfig.front, cloneConfig.close);
 		document.body.append(cloneConfig.back);
 
@@ -179,6 +182,8 @@ const Modal = {
 			overflow: auto;
 			z-index: 9999;
 			transition: all ease .4s;
+			scrollbar-width: 12.5px;
+			scrollbar-color: #C0C0C0 #696969;
 			background-color: ${Modal.css?.front?.backgroundColor ?? "#FFFFEF"};
 			border: ${Modal.css?.front?.border ?? "1px grey solid"};
 			border-radius: ${Modal.css?.front?.borderRadius ?? 0};
@@ -190,18 +195,6 @@ const Modal = {
 			{transform: "scaleY(0)"},
 			{transform: "scaleY(1)"}
 		], {duration: 400});
-
-		if (Modal.text){
-			if (Modal.type(Modal.text) === "[object String]"){
-				front.innerHTML = Modal.text;
-			}
-			else{
-				front.append(Modal.text);
-			}
-		}
-		else{
-			Modal.getContent();
-		}
 
 		return front;
 	},
@@ -222,20 +215,34 @@ const Modal = {
 		return close;
 	},
 
-	getContent(){
-		if (Modal.url){
-			let url = Modal.url, data;
+	addContent(config){
+		if (config.text){
+			if (Modal.type(config.text) === "[object String]"){
+				config.front.innerHTML = config.text;
+			}
+			else{
+				config.front.append(config.text);
+			}
+		}
+		else{
+			Modal.getContent(config);
+		}
+	},
 
-			if (Modal.data){
-				switch (Modal.type(Modal.data)){
+	getContent(config){
+		if (config.url){
+			let url = config.url, data;
+
+			if (config.data){
+				switch (Modal.type(config.data)){
 					case "[object String]":
-						url += `?${Modal.data}`;
+						url += `?${config.data}`;
 						break;
 
 					case "[object Object]":
 						data = [];
-						for (const key in Modal.data){
-							data.push(`${key}=${Modal.data[key]}`);
+						for (const key in config.data){
+							data.push(`${key}=${config.data[key]}`);
 						}
 						url += `?${data.join("&")}`;
 						break;
@@ -244,8 +251,8 @@ const Modal = {
 
 			fetch(url)
 				.then(response => response.text())
-				.then(content => Modal.front.innerHTML = content)
-				.catch(error => Modal.onError(error));
+				.then(content => config.front.innerHTML = content)
+				.catch(error => config.onError(error));
 		}
 	},
 
@@ -274,8 +281,8 @@ const Modal = {
 
 			setTimeout(_ => {
 				isScrollVisible = front.scrollHeight > front.clientHeight;
-				close.style.top = `${front.getBoundingClientRect().top + 4}px`;
-				close.style.left = `${front.getBoundingClientRect().right - (close.offsetWidth * (isScrollVisible ? 2 : 1.5))}px`;
+				close.style.top = `${front.getBoundingClientRect().top + 5}px`;
+				close.style.left = `${front.getBoundingClientRect().right - (close.offsetWidth * (isScrollVisible ? 2.5 : 1.85))}px`;
 				close.style.opacity = 1;
 			}, 400);
 		});
