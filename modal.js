@@ -138,7 +138,7 @@ const Modal = {
 			width = window.innerWidth,
 			height = window.innerHeight;
 
-		back.id = `modalBack-${Modal.id}`;
+		back.id = `modalBack-${Modal.id.substring(Modal.id.indexOf("-") + 1)}`;
 		back.style = `
 			position: absolute;
 			background-color: rgba(0, 0, 0, .6);
@@ -167,17 +167,16 @@ const Modal = {
 			width = window.innerWidth,
 			height = window.innerHeight;
 
-		front.id = `modalFront-${Modal.id}`;
+		front.id = `modalFront-${Modal.id.substring(Modal.id.indexOf("-") + 1)}`;
 		front.style = `
-			position: fixed;
 			min-width: ${width * (width < 850 ? .4 : .5)}px;
 			max-width: ${width * (width < 850 ? .8 : .7)}px;
 			min-height: ${height * (height < 850 ? .5 : .65)}px;
 			max-height: ${height * (height < 850 ? .75 : .85)}px;
 			display: flex;
 			align-items: center;
-			justify-content: center;
 			flex-direction: column;
+			text-align: center;
 			padding: .5% 2.5%;
 			box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
 			word-wrap: break-word;
@@ -186,11 +185,11 @@ const Modal = {
 			transition: all ease .4s;
 			scrollbar-width: 12.5px;
 			scrollbar-color: #C0C0C0 #696969;
-			background-color: ${Modal.css?.front?.backgroundColor ?? "#FFFFEF"};
-			border: ${Modal.css?.front?.border ?? "1px grey solid"};
-			border-radius: ${Modal.css?.front?.borderRadius ?? 0};
-			text-align: ${Modal.css?.front?.textAlign ?? "center"};
-			font-weight: ${Modal.css?.front?.fontWeight ?? "normal"};
+			background-color: ${Modal.css?.front?.backgroundColor?.length ? Modal.css.front.backgroundColor : "#FFFFEF"};
+			border: ${Modal.css?.front?.border?.length ? Modal.css.front.border : "1px grey solid"};
+			border-radius: ${Modal.css?.front?.borderRadius?.length ? Modal.css.front.borderRadius : 0};
+			text-align: ${Modal.css?.front?.textAlign?.length ? Modal.css.front.textAlign : "center"};
+			font-weight: ${Modal.css?.front?.fontWeight?.length ? Modal.css.front.fontWeight : "normal"};
 		`;
 
 		front.animate([
@@ -209,7 +208,7 @@ const Modal = {
 			user-select: none;
 			opacity: 0;
 			z-index: 9999;
-			color: ${Modal.css?.close?.color ?? "#000"};
+			color: ${Modal.css?.close?.color?.length ? Modal.css.close.color : "#000"};
 		`;
 		close.textContent = "❌";
 		close.title = "Cerrar esta ventana";
@@ -326,17 +325,17 @@ const Modal = {
 
 		Modal.queue.splice(index, 1);
 
-		if (!Modal.queue.length){
-			document.body.style.overflow = "auto";
-		}
-		else{
-			Modal.resize();
-		}
-
 		setTimeout(_ => {
 			back.remove();
 			front.remove();
 			config.onHide && config.onHide();			
+
+			if (!Modal.queue.length){
+				document.body.style.overflow = "auto";
+			}
+			else{
+				Modal.resize();
+			}
 		}, 400);
 	},
 
@@ -357,10 +356,10 @@ const Modal = {
 			setTimeout(_ => {
 				back.remove();
 				front.remove();				
+				document.body.style.overflow = "auto";
 			}, 400);
 		});
-
-		document.body.style.overflow = "auto";
+		
 		Modal.queue = [];
 	}
 };
