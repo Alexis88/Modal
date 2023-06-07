@@ -228,7 +228,12 @@ const Modal = {
 	addContent(config){
 		if (config.text){
 			if (Modal.type(config.text) === "[object String]"){
-				config.front.innerHTML = config.text;
+				if (config.media){
+					config.front = new DOMParser().parseFromString(config.text, "text/html").documentElement;
+				}
+				else{
+					config.front.innerHTML = config.text;
+				}
 			}
 			else{
 				config.front.append(config.text);
@@ -283,7 +288,7 @@ const Modal = {
 				}
 				else{
 					if (config.media){
-						config.front = new DOMParser().parseFromString(content, "text/html").documentElement;
+						config.front = new DOMParser().parseFromString(content, "text/html").documentElement.childNodes[1].childNodes[0];
 					}
 					else{
 						config.front.innerHTML = content;
