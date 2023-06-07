@@ -229,14 +229,19 @@ const Modal = {
 		if (config.text){
 			if (Modal.type(config.text) === "[object String]"){
 				if (config.media){
-					config.front = new DOMParser().parseFromString(config.text, "text/html").documentElement;
+					config.front = new DOMParser().parseFromString(config.text, "text/html").documentElement.childNodes[1].childNodes[0];
 				}
 				else{
 					config.front.innerHTML = config.text;
 				}
 			}
 			else{
-				config.front.append(config.text);
+				if (config.media){
+					config.front = config.text;
+				}
+				else{
+					config.front.append(config.text);
+				}
 			}
 		}
 		
@@ -314,10 +319,10 @@ const Modal = {
 			back.style.width = `${width}px`;
 			back.style.height = `${height}px`;
 
-			front.style.minWidth = `${width * (width < 850 ? .4 : .5)}px`;
-			front.style.maxWidth = `${width * (width < 850 ? .8 : .7)}px`;
-			front.style.minHeight = `${height * (height < 850 ? .5 : .65)}px`;
-			front.style.maxHeight = `${height * (height < 850 ? .75 : .85)}px`;
+			front.style.minWidth = `${config.media ? width * .25 : width * (width < 850 ? .4 : .5)}px`;
+			front.style.maxWidth = `${config.media ? width * .75 : width * (width < 850 ? .8 : .7)}px`;
+			front.style.minHeight = `${config.media ? width * .3 : height * (height < 850 ? .5 : .65)}px`;
+			front.style.maxHeight = `${config.media ? width * .85 : height * (height < 850 ? .75 : .85)}px`;
 
 			close.style.opacity = 0;
 
