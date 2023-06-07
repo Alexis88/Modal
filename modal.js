@@ -10,6 +10,7 @@
  *		text: "Texto de ejemplo",
  * 		url: "ejemplo.php",
  * 		data: "foo=bar&bin=baz" o {foo: "bar", bin: "baz"},
+ * 		media: true,
  * 		onShow: _ => {
  * 			//Esto se ejecutará luego de haber cargado la ventana modal
  * 		},
@@ -46,10 +47,11 @@ const Modal = {
 	 * options.text: Texto a mostrar
 	 * options.url: URL a consultar para obtener el contenido a mostrar
 	 * options.data: Datos a adjuntar a la URL a consultar
-	 * onShow: Llamada de retorno a ejecutarse luego de mostrarse la ventana modal
-	 * onHide: Llamada de retorno a ejecutarse luego de cerrarse la ventana modal
-	 * onError: Llamada de retorno a ejecutarse luego de producirse un error al ejecutar la consulta a la URL
-	 * css: {
+	 * options.media: Especifica si de la URL a consultar se obtendrá un recurso multimedia
+	 * options.onShow: Llamada de retorno a ejecutarse luego de mostrarse la ventana modal
+	 * options-onHide: Llamada de retorno a ejecutarse luego de cerrarse la ventana modal
+	 * options.onError: Llamada de retorno a ejecutarse luego de producirse un error al ejecutar la consulta a la URL
+	 * options.css: {
 	 * 		front: {Estilos CSS para el contenido central},
 	 * 		close: {Estilos CSS para el botón de cerrado}
 	 * }
@@ -69,6 +71,7 @@ const Modal = {
 				Modal.text = options.text || "";
 				Modal.url = options.url || false;
 				Modal.data = options.data || false;
+				Modal.media = options.media || false;
 				Modal.onShow = options.onShow && Modal.isFunction(options.onShow) ? options.onShow : null;
 				Modal.onHide = options.onHide && Modal.isFunction(options.onHide) ? options.onHide : null;
 				Modal.onError = options.onError && Modal.isFunction(options.onError) ? options.onError : null;
@@ -107,6 +110,13 @@ const Modal = {
 		}, false);
 		window.addEventListener("resize", Modal.resize, false);
 		window.addEventListener("orientationchange", Modal.resize, false);
+		window.addEventListener("scroll", _ => {
+			const modals = document.querySelectorAll("[id^=modalBack]");
+			
+			if (modals.length){
+				modals[modals.length - 1].scrollIntoView();
+			}
+		}, false);
 	},
 
 	createModal(){
@@ -121,7 +131,6 @@ const Modal = {
 		Modal.addContent(cloneConfig);
 		cloneConfig.back.append(cloneConfig.front, cloneConfig.close);
 		document.body.append(cloneConfig.back);
-		document.body.style.overflow = "hidden";
 
 		setTimeout(_ => {
 			cloneConfig.onShow && cloneConfig.onShow();
@@ -232,7 +241,7 @@ const Modal = {
 	},
 
 	getContent(config){
-		let url = config.url, data;
+		let url = config.url, data, dataType;
 
 		if (config.data){
 			switch (Modal.type(config.data)){
@@ -253,13 +262,34 @@ const Modal = {
 		fetch(url)
 			.then(response => {
 				if (response.ok){
-					return response.text();
+					const headers = response.headers.get("content-type");
+
+					if (headers.includes("application/json")){
+						dataType = "json";
+						return response.json();	
+					}
+					else{
+						dataType = "text";
+						return response.text();
+					}
 				}
 				else{
-					config.onError(response.status)
+					config.onError(response.status);
 				}
 			})
-			.then(content => config.front.innerHTML = content)
+			.then(content => {
+				if (dataType == "json"){
+					config.onShow(content);
+				}
+				else{
+					if (config.media){
+						config.front = new DOMParser().parseFromString(content, "text/html").documentElement;
+					}
+					else{
+						config.front.innerHTML = content;
+					}
+				}
+			})
 			.catch(error => config.onError(error));
 	},
 
@@ -288,8 +318,8 @@ const Modal = {
 
 			setTimeout(_ => {
 				isScrollVisible = front.scrollHeight > front.clientHeight;
-				close.style.top = `${front.getBoundingClientRect().top + 5}px`;
-				close.style.left = `${front.getBoundingClientRect().right - (close.offsetWidth * (isScrollVisible ? 2.5 : 1.85))}px`;
+				close.style.top = `${front.getBoundingClientRect().top + 10}px`;
+				close.style.left = `${front.getBoundingClientRect().right - (close.offsetWidth * (isScrollVisible ? 2.5 : 1.8))}px`;
 				close.style.opacity = 1;
 			}, 400);
 		});
@@ -330,10 +360,7 @@ const Modal = {
 			front.remove();
 			config.onHide && config.onHide();			
 
-			if (!Modal.queue.length){
-				document.body.style.overflow = "auto";
-			}
-			else{
+			if (Modal.queue.length){
 				Modal.resize();
 			}
 		}, 400);
@@ -355,8 +382,7 @@ const Modal = {
 
 			setTimeout(_ => {
 				back.remove();
-				front.remove();				
-				document.body.style.overflow = "auto";
+				front.remove();
 			}, 400);
 		});
 		
