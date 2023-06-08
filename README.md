@@ -1,10 +1,12 @@
 # Modal
 **VENTANAS MODALES PERSONALIZADAS**
 
-Este *plugin* genera ventanas modales personalizadas. Pueden mostrar contenido plano o multimedia, ya sean cargados de forma asíncrona o no.
-Se pueden mostrar varias a la vez sin que se generen conflictos.
-Se pueden cerrar tanto al pulsar el botón de cerrado ubicado en la esquina superior derecha de la ventana o bien pulsando la tecla **ESC**.
-Se puede personalizar los colores del fondo y estilos de los bordes de la ventana, el color y grosor del texto y el color del botón de cerrado.
+Este *plugin* genera ventanas modales personalizadas. Algunas de sus características principales:
+
+- Pueden mostrar contenido plano o multimedia, ya sea cargado de forma asíncrona o no.
+- Se pueden mostrar varias ventanas a la vez sin que se generen conflictos entre ellas.
+- Se pueden cerrar tanto al pulsar el botón de cerrado ubicado en la esquina superior derecha de la ventana o bien pulsando la tecla **ESC**.
+- Se puede personalizar los colores del fondo y estilos de los bordes de la ventana, el color y grosor del texto y el color del botón de cerrado.
 
 **Ejemplos de uso:**
 
