@@ -1,5 +1,5 @@
 # Modal
-**VENTANAS MODALES PERSONALIZADAS**
+**VENTANAS MODALES PERSONALIZADAS** 
 
 Este *plugin* genera ventanas modales personalizadas. Pueden mostrar contenido plano o multimedia, ya sean cargados de forma asíncrona o no.
 Se pueden mostrar varias a la vez sin que se generen conflictos.
