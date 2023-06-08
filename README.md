@@ -92,13 +92,13 @@ Modal.show({
 - Reemplazando el cuadro central de la ventana modal con un elemento HTML con contenido multimedia
 
 ```javascript
+//Carga directa
 Modal.show({
 	text: "<img src='images/logo.png' />",
 	media: true
 });
-```
 
-```javascript
+//Carga asíncrona
 Modal.show({
 	url: "imagen.php?id=5", //En caso devolviera un elemento <img> o <video>
 	media: true
