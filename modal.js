@@ -61,35 +61,33 @@ const Modal = {
 			throw new Error("Tiene que establecer un contenido para la ventana modal");
 		}
 
-		setTimeout(_ => {
-			Modal.id = `modalID-${new Date().getTime()}`;
+		Modal.options = {};
+		Modal.options.id = `modalID-${new Date().getTime()}`;		
 
-			if (Modal.type(options) == "[object String]"){
-				Modal.text = options;			
-			}
-			else{
-				Modal.text = options.text || "";
-				Modal.url = options.url || false;
-				Modal.data = options.data || false;
-				Modal.media = options.media || false;
-				Modal.onShow = options.onShow && Modal.isFunction(options.onShow) ? options.onShow : null;
-				Modal.onHide = options.onHide && Modal.isFunction(options.onHide) ? options.onHide : null;
-				Modal.onError = options.onError && Modal.isFunction(options.onError) ? options.onError : null;
-				Modal.css = options.css || null;
-			}
+		if (Modal.type(options, "string")){
+			Modal.options.text = options;			
+		}
+		else{
+			Modal.options.text = options.text || "";
+			Modal.options.url = options.url || false;
+			Modal.options.data = options.data || false;
+			Modal.options.media = options.media || false;
+			Modal.options.onShow = options.onShow && Modal.type(options.onShow, "function") ? options.onShow : null;
+			Modal.options.onHide = options.onHide && Modal.type(options.onHide, "function") ? options.onHide : null;
+			Modal.options.onError = options.onError && Modal.type(options.onError, "function") ? options.onError : null;
+			Modal.options.css = options.css || null;
+		}
 
-			Modal.queue ??= [];
-			const cloneConfig = Modal.createModal();
-			Modal.events(cloneConfig);
-		}, 100);
+		Modal.queue ??= [];
+		Modal.createModal();
 	},
 
-	type(elem){
+	type(elem, type){
+		if (type){
+			type = type.charAt(0).toUpperCase() + type.substring(1);
+			return {}.toString.call(elem) === `[object ${type}]`;
+		}
 		return {}.toString.call(elem);
-	},
-
-	isFunction(fn){
-		return Modal.type(fn) === "[object Function]";
 	},
 
 	events(config){
@@ -120,24 +118,38 @@ const Modal = {
 	},
 
 	createModal(){
-		Modal.back = Modal.createBack();
-		Modal.front = Modal.createFront();
-		Modal.close = Modal.createClose();
+		Modal.options.back = Modal.createBack();
+		Modal.options.front = Modal.createFront();
+		Modal.options.close = Modal.createClose();
 
-		const cloneConfig = {...Modal};
-		delete cloneConfig.queue;
+		const cloneConfig = {...Modal.options};
+		delete cloneConfig.queue;		
 		Modal.queue.push(cloneConfig);
 
-		Modal.addContent(cloneConfig);
-		cloneConfig.back.append(cloneConfig.front, cloneConfig.close);
-		document.body.append(cloneConfig.back);
+		Modal.addContent(cloneConfig, (response, front) => {
+			cloneConfig.back.append(cloneConfig.front, cloneConfig.close);
+			document.body.append(cloneConfig.back);
+			Modal.events(cloneConfig);			
 
-		setTimeout(_ => {
-			cloneConfig.onShow && cloneConfig.onShow();
-			Modal.resize();
-		}, 400);
-
-		return cloneConfig;
+			setTimeout(_ => {
+				if (cloneConfig.onShow){
+					if (response && front){
+						cloneConfig.onShow(response, front);
+					}
+					else if (!response && front){
+						cloneConfig.onShow(front);	
+					}
+					else if (response && !front){
+						cloneConfig.onShow(response);	
+					}
+					else{
+						cloneConfig.onShow();
+					}
+				}
+				
+				Modal.resize();
+			}, 400);
+		});		
 	},
 
 	createBack(){
@@ -147,7 +159,7 @@ const Modal = {
 			width = window.innerWidth,
 			height = window.innerHeight;
 
-		back.id = `modalBack-${Modal.id.substring(Modal.id.indexOf("-") + 1)}`;
+		back.id = `modalBack-${Modal.options.id.substring(Modal.options.id.indexOf("-") + 1)}`;
 		back.style = `
 			position: absolute;
 			background-color: rgba(0, 0, 0, .6);
@@ -176,7 +188,7 @@ const Modal = {
 			width = window.innerWidth,
 			height = window.innerHeight;
 
-		front.id = `modalFront-${Modal.id.substring(Modal.id.indexOf("-") + 1)}`;
+		front.id = `modalFront-${Modal.options.id.substring(Modal.options.id.indexOf("-") + 1)}`;
 		front.style = `
 			min-width: ${width * (width < 850 ? .4 : .5)}px;
 			max-width: ${width * (width < 850 ? .8 : .7)}px;
@@ -185,20 +197,20 @@ const Modal = {
 			display: flex;
 			align-items: center;
 			flex-direction: column;
+			overflow: auto;
 			text-align: center;
 			padding: .5% 2.5%;
 			box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
 			word-wrap: break-word;
-			overflow: auto;
 			z-index: 9999;
 			transition: all ease .4s;
 			scrollbar-width: 12.5px;
 			scrollbar-color: #C0C0C0 #696969;
-			background-color: ${Modal.css?.front?.backgroundColor?.length ? Modal.css.front.backgroundColor : "#FFFFEF"};
-			border: ${Modal.css?.front?.border?.length ? Modal.css.front.border : "1px grey solid"};
-			border-radius: ${Modal.css?.front?.borderRadius?.length ? Modal.css.front.borderRadius : 0};
-			text-align: ${Modal.css?.front?.textAlign?.length ? Modal.css.front.textAlign : "center"};
-			font-weight: ${Modal.css?.front?.fontWeight?.length ? Modal.css.front.fontWeight : "normal"};
+			background-color: ${Modal.options?.css?.front?.backgroundColor?.length ? Modal.options.css.front.backgroundColor : "#FFFFEF"};
+			border: ${Modal.options?.css?.front?.border?.length ? Modal.options.css.front.border : "1px grey solid"};
+			border-radius: ${Modal.options?.css?.front?.borderRadius?.length ? Modal.options.css.front.borderRadius : 0};
+			text-align: ${Modal.options?.css?.front?.textAlign?.length ? Modal.options.css.front.textAlign : "center"};
+			font-weight: ${Modal.options?.css?.front?.fontWeight?.length ? Modal.options.css.front.fontWeight : "normal"};
 		`;
 
 		front.animate([
@@ -217,7 +229,7 @@ const Modal = {
 			user-select: none;
 			opacity: 0;
 			z-index: 9999;
-			color: ${Modal.css?.close?.color?.length ? Modal.css.close.color : "#000"};
+			color: ${Modal.options?.css?.close?.color?.length ? Modal.options.css.close.color : "#000"};
 		`;
 		close.textContent = "❌";
 		close.title = "Cerrar esta ventana";
@@ -225,19 +237,23 @@ const Modal = {
 		return close;
 	},
 
-	addContent(config){
+	addContent(config, callback){
 		if (config.text){
-			if (Modal.type(config.text) === "[object String]"){
+			if (Modal.type(config.text, "string")){
 				if (config.media){
+					config.front.style.opacity = 0;
 					config.front = new DOMParser().parseFromString(config.text, "text/html").documentElement.childNodes[1].childNodes[0];
+					setTimeout(_ => config.front.style.opacity = 1, 400);
 				}
 				else{
-					config.front.innerHTML = config.text;
+					config.front.innerHTML = config.text.replaceAll("\n", "<br />");
 				}
 			}
 			else{
 				if (config.media){
+					config.front.style.opacity = 0;
 					config.front = config.text;
+					setTimeout(_ => config.front.style.opacity = 1, 400);
 				}
 				else{
 					config.front.append(config.text);
@@ -246,11 +262,14 @@ const Modal = {
 		}
 		
 		if (config.url){
-			Modal.getContent(config);
+			Modal.getContent(config, callback);
+		}
+		else{
+			callback();
 		}
 	},
 
-	getContent(config){
+	getContent(config, callback){
 		let url = config.url, data, dataType;
 
 		if (config.data){
@@ -289,15 +308,19 @@ const Modal = {
 			})
 			.then(content => {
 				if (dataType == "json"){
-					config.onShow(content);
+					callback(content, config.front);
 				}
 				else{
 					if (config.media){
+						config.front.style.opacity = 0;
 						config.front = new DOMParser().parseFromString(content, "text/html").documentElement.childNodes[1].childNodes[0];
+						setTimeout(_ => config.front.style.opacity = 1, 400);
 					}
 					else{
 						config.front.innerHTML = content;
 					}
+
+					callback(config.front);
 				}
 			})
 			.catch(error => config.onError(error));
@@ -321,8 +344,8 @@ const Modal = {
 
 			front.style.minWidth = `${config.media ? width * .25 : width * (width < 850 ? .4 : .5)}px`;
 			front.style.maxWidth = `${config.media ? width * .75 : width * (width < 850 ? .8 : .7)}px`;
-			front.style.minHeight = `${config.media ? width * .3 : height * (height < 850 ? .5 : .65)}px`;
-			front.style.maxHeight = `${config.media ? width * .85 : height * (height < 850 ? .75 : .85)}px`;
+			front.style.minHeight = `${config.media ? height * .3 : height * (height < 850 ? .5 : .65)}px`;
+			front.style.maxHeight = `${config.media ? height * .85 : height * (height < 850 ? .75 : .85)}px`;
 
 			close.style.opacity = 0;
 
