@@ -1,4 +1,4 @@
-# Modal
+# Modal.js
 **VENTANAS MODALES PERSONALIZADAS**
 
 Este *plugin* genera ventanas modales personalizadas. Algunas de sus características principales:
