@@ -9,7 +9,7 @@ Este *plugin* genera ventanas modales personalizadas. Algunas de sus caracterís
 - Se puede personalizar los colores del fondo y estilos de los bordes de la ventana, el color y grosor del texto y el color del botón de cerrado.
 - Se adaptan a las dimensiones del dispositivo (*full responsive*).
 
-**Datos admitidos:**
+# Datos admitidos:
 
 ```javascript
 Modal.show("Cadena de caracteres (puede incluir etiquetas HTML)");
@@ -25,7 +25,7 @@ Modal.show({
 });
 ```
 
-**Ejemplos de uso:**
+# Ejemplos de uso:
 
 - Pasando un texto simple:
 
