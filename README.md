@@ -12,8 +12,10 @@ Este *plugin* genera ventanas modales personalizadas. Algunas de sus caracterís
 # Datos admitidos:
 
 ```javascript
+//Cadena de caracteres
 Modal.show("Cadena de caracteres (puede incluir etiquetas HTML)");
 
+//Objeto literal con opciones de configuración
 Modal.show({
 	text: Cualquier cadena de caracteres (puede incluir etiquetas HTML),
 	url: Una cadena de caracteres con el nombre de la ruta a consultar (puede incluir la cadena de consulta),
