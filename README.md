@@ -33,6 +33,11 @@ Modal.show({
 Modal.show("¡Hola!");
 ```
 
+- Pasando una etiqueta HTML como texto:
+```javascript
+Modal.show("<img src='images/newyork.png' />");
+```
+
 - Cargando un contenido externo con un GIF que se muestra como vista previa:
 
 ```javascript
