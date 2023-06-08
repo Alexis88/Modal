@@ -105,6 +105,32 @@ Modal.show({
 });
 ```
 
+- Si se recibiera un contenido de tipo JSON de una consulta externa, se puede manipular el contenido recibido
+
+```javascript
+Modal.show({
+	url: "personas.php",
+	data: {
+		id: 29
+	},
+	onShow: (contenido, ventanaModal) => {
+		const
+			nombre = contenido.name,
+			apellidos = contenido.lastName,
+			edad = contenido.age;
+
+		ventanaModal.innerHTML = `
+			<pre>
+				<b>Nombre:</b> ${nombre}
+				<b>Apellidos:</b> ${apellidos}
+				<b>Edad:</b> ${edad}
+			</pre>
+		`;
+	}
+});
+
+```
+
 - Personalizando los colores del contenido:
 
 ```javascript
