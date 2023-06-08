@@ -171,3 +171,9 @@ Modal.show({
 	}
 });
 ```
+
+- Ocultando todas las ventanas modales presentes (**ADVERTENCIA:** no se ejecutarán las llamadas de retorno asociadas):
+
+```javascript
+Modal.hideAll();
+```
