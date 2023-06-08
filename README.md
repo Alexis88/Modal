@@ -31,19 +31,19 @@ Modal.show({
 	url: "alumnos.php",
 	data: {
 		idClase: 25,
-		estado: "aprobados"
+		estado: "aprobado"
 	}
 });
 
 //Adjuntando la cadena de consulta directamente en la ruta de destino
 Modal.show({
-	url: "alumnos.php?idClase=25&estado=aprobados"
+	url: "alumnos.php?idClase=25&estado=aprobado"
 });
 
 //Adjuntando la cadena de consulta por fuera
 Modal.show({
 	url: "alumnos.php",
-	data: "idClase=25&estado=aprobados"
+	data: "idClase=25&estado=aprobado"
 });
 ```
 
