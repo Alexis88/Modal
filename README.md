@@ -8,6 +8,22 @@ Este *plugin* genera ventanas modales personalizadas. Algunas de sus caracterís
 - Se pueden cerrar tanto al pulsar el botón de cerrado ubicado en la esquina superior derecha de la ventana o bien pulsando la tecla **ESC**.
 - Se puede personalizar los colores del fondo y estilos de los bordes de la ventana, el color y grosor del texto y el color del botón de cerrado.
 
+**Datos admitidos:**
+
+```javascript
+Modal.show("Cadena de caracteres");
+
+Modal.show({
+	text: Cualquier cadena de caracteres (puede incluir etiquetas HTML),
+	url: Una cadena de caracteres con el nombre de la ruta a consultar (puede incluir la cadena de consulta),
+	data: Una cadena de caracteres u objeto literal con los datos de la cadena de consulta,
+	media: Dato lógico (*true* o *false*) que establece si se reemplazará la ventana por un contenido multimedia (<img> o <video>),
+	onShow: Función que se ejecutará luego de que se haya mostrado la ventana modal,
+	onHide: Función que se ejecutará luego de que se haya ocultado la ventana modal,
+	onError: Función que se ejecutará si ocurre un error durante la carga de contenido externo (el que devuelva la consulta mediante el atributo *url*)
+});
+```
+
 **Ejemplos de uso:**
 
 - Pasando un texto simple:
