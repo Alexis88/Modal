@@ -84,8 +84,7 @@ const Modal = {
 
 	type(elem, type){
 		if (type){
-			type = type.charAt(0).toUpperCase() + type.substring(1);
-			return {}.toString.call(elem) === `[object ${type}]`;
+			return {}.toString.call(elem).toLowerCase() === `[object ${type}]`.toLowerCase();
 		}
 		return {}.toString.call(elem);
 	},
