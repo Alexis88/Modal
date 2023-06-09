@@ -20,7 +20,7 @@ Modal.show({
 	text: Cualquier cadena de caracteres (puede incluir etiquetas HTML),
 	url: Una cadena de caracteres con el nombre de la ruta a consultar (puede incluir la cadena de consulta),
 	data: Una cadena de caracteres u objeto literal con los datos de la cadena de consulta,
-	media: Valor lógico (true o false) que establece si se reemplazará la ventana por un contenido multimedia (<img> o <video>),
+	media: Valor lógico (true o false) que establece si se reemplazará la ventana por un contenido HTML,
 	onShow: Función que se ejecutará luego de que se haya mostrado la ventana modal (trabajará con los argumentos del contenido y la ventana cuando se reciba una respuesta de tipo JSON o solo con la ventana modal si se reemplaza la ventana por un contenido multimedia [ver ejemplos]),
 	onHide: Función que se ejecutará luego de que se haya ocultado la ventana modal,
 	onError: Función que se ejecutará si ocurre un error durante la carga de contenido externo (el que devuelva la consulta mediante el atributo URL)
@@ -115,7 +115,7 @@ Modal.show({
 });
 ```
 
-- Reemplazando el cuadro central de la ventana modal con un elemento HTML con contenido multimedia
+- Reemplazando el cuadro central de la ventana modal por un elemento HTML
 
 ```javascript
 //Carga directa
