@@ -391,11 +391,8 @@ const Modal = {
 		setTimeout(_ => {
 			back.remove();
 			front.remove();
-			config.onHide && config.onHide();			
-
-			if (Modal.queue.length){
-				Modal.resize();
-			}
+			config.onHide && config.onHide();
+			Modal.queue.length && Modal.resize();
 		}, 400);
 	},
 
