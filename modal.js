@@ -351,7 +351,7 @@ const Modal = {
 			setTimeout(_ => {
 				isScrollVisible = front.scrollHeight > front.clientHeight;
 				close.style.top = `${front.getBoundingClientRect().top + 10}px`;
-				close.style.left = `${front.getBoundingClientRect().right - (close.offsetWidth * (isScrollVisible ? 2.5 : 1.8))}px`;
+				close.style.left = `${front.getBoundingClientRect().right - (close.offsetWidth * (isScrollVisible ? 2.1 : 1.8))}px`;
 				close.style.opacity = 1;
 			}, 400);
 		});
