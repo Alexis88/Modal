@@ -189,9 +189,10 @@ const Modal = {
 
 		front.id = `modalFront-${Modal.options.id.substring(Modal.options.id.indexOf("-") + 1)}`;
 		front.style = `
+			width: max-content;
 			min-width: ${width * (width < 850 ? .4 : .5)}px;
 			max-width: ${width * (width < 850 ? .8 : .7)}px;
-			min-height: ${height * (height < 850 ? .5 : .65)}px;
+			height: max-content;
 			max-height: ${height * (height < 850 ? .75 : .85)}px;
 			display: flex;
 			align-items: center;
@@ -343,7 +344,6 @@ const Modal = {
 
 			front.style.minWidth = `${config.media ? width * .25 : width * (width < 850 ? .4 : .5)}px`;
 			front.style.maxWidth = `${config.media ? width * .75 : width * (width < 850 ? .8 : .7)}px`;
-			front.style.minHeight = `${config.media ? height * .3 : height * (height < 850 ? .5 : .65)}px`;
 			front.style.maxHeight = `${config.media ? height * .85 : height * (height < 850 ? .75 : .85)}px`;
 
 			close.style.opacity = 0;
