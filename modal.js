@@ -125,11 +125,13 @@ const Modal = {
 		delete cloneConfig.queue;		
 		Modal.queue.push(cloneConfig);
 
-		Modal.addContent(cloneConfig, (response, front) => {
-			cloneConfig.back.append(cloneConfig.front, cloneConfig.close);
-			document.body.append(cloneConfig.back);
-			Modal.events(cloneConfig);			
+		cloneConfig.back.append(cloneConfig.front, cloneConfig.close);
+		document.body.append(cloneConfig.back);
+		Modal.events(cloneConfig);
+		Modal.resize();
 
+		Modal.addContent(cloneConfig, (response, front) => {
+			cloneConfig.close.style.opacity = 0;
 			setTimeout(_ => {
 				if (cloneConfig.onShow){
 					if (response && front){
@@ -144,8 +146,7 @@ const Modal = {
 					else{
 						cloneConfig.onShow();
 					}
-				}
-				
+				}				
 				Modal.resize();
 			}, 400);
 		});		
@@ -241,8 +242,11 @@ const Modal = {
 		if (config.text){
 			if (Modal.type(config.text, "string")){
 				if (config.media){
+					const elem = new DOMParser().parseFromString(config.text, "text/html").documentElement.childNodes[1].childNodes[0];
+					elem.id = config.front.id;
 					config.front.style.opacity = 0;
-					config.front = new DOMParser().parseFromString(config.text, "text/html").documentElement.childNodes[1].childNodes[0];
+					config.back.replaceChild(elem, config.front);
+					config.front = elem;
 					setTimeout(_ => config.front.style.opacity = 1, 400);
 				}
 				else{
