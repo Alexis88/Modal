@@ -315,8 +315,11 @@ const Modal = {
 				}
 				else{
 					if (config.media){
+						const elem = new DOMParser().parseFromString(content, "text/html").documentElement.childNodes[1].childNodes[0];
+						elem.id = config.front.id;
 						config.front.style.opacity = 0;
-						config.front = new DOMParser().parseFromString(content, "text/html").documentElement.childNodes[1].childNodes[0];
+						config.back.replaceChild(elem, config.front);
+						config.front = elem;
 						setTimeout(_ => config.front.style.opacity = 1, 400);
 					}
 					else{
