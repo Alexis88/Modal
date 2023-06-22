@@ -79,7 +79,7 @@ const Modal = {
 		}
 
 		Modal.queue ??= [];
-		Modal.createModal();
+		return Modal.createModal();
 	},
 
 	type(elem, type){
@@ -147,6 +147,8 @@ const Modal = {
 				Modal.resize();
 			}, 400);
 		});		
+
+		return cloneConfig;
 	},
 
 	createBack(){
