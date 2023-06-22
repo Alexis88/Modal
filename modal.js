@@ -174,8 +174,8 @@ const Modal = {
 		`;
 
 		back.animate([
-			{opacity: 0},
-			{opacity: .6}
+			{backgroundColor: "rgba(0, 0, 0, 0)"},
+			{backgroundColor: "rgba(0, 0, 0, .6)"}
 		], {duration: 400});
 
 		return back;
@@ -379,8 +379,8 @@ const Modal = {
 		}
 
 		back.animate([
-			{opacity: .6},
-			{opacity: 0}
+			{backgroundColor: "rgba(0, 0, 0, .6)"},
+			{backgroundColor: "rgba(0, 0, 0, 0)"}
 		], {duration: 400, fill: "forwards"});
 
 		front.animate([
@@ -403,8 +403,8 @@ const Modal = {
 			const front = back.querySelector("[id^=modalFront-]");
 
 			back.animate([
-				{opacity: .6},
-				{opacity: 0}
+				{backgroundColor: "rgba(0, 0, 0, .6)"},
+				{backgroundColor: "rgba(0, 0, 0, 0)"}
 			], {duration: 400, fill: "forwards"});
 
 			front.animate([
