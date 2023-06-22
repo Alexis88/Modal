@@ -196,3 +196,10 @@ Modal.show({
 ```javascript
 Modal.hideAll();
 ```
+
+- Ocultando una ventana específica:
+
+```javascript
+const modal = Modal.show("¡Hola!");
+Modal.hide(modal);
+```
