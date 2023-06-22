@@ -361,7 +361,7 @@ const Modal = {
 	},
 
 	hide(config){
-		var queue, index, back, front;
+		let queue, index, back, front;
 
 		//Cuando se oculta la ventana modal pulsando la tecla ESC
 		if (!config){
@@ -399,7 +399,7 @@ const Modal = {
 	},
 
 	hideAll(){
-		[...document.querySelectorAll("[id^=modalBack-]")].forEach(back => {
+		document.querySelectorAll("[id^=modalBack-]").forEach(back => {
 			const front = back.querySelector("[id^=modalFront-]");
 
 			back.animate([
