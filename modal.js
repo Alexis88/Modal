@@ -30,6 +30,7 @@
  * 			},
  * 			close: {
  * 				color: "#000";
+ *				display: initial;
  * 			}
  * 		}
  * });
@@ -229,6 +230,7 @@ const Modal = {
 			user-select: none;
 			opacity: 0;
 			z-index: 9999;
+			display: ${Modal.options?.css?.close?.display?.length ? Modal.options.css.close.display : "initial"};
 			color: ${Modal.options?.css?.close?.color?.length ? Modal.options.css.close.color : "#000"};
 		`;
 		close.textContent = "❌";
