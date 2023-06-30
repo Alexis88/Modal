@@ -191,6 +191,20 @@ Modal.show({
 });
 ```
 
+- Ocultando el botón de cerrado
+
+```javascript
+Modal.show({
+	text: "<img src='images/mountains.png' />",
+	css: {
+		//El botón de cerrado
+		close: {
+			display: "none"
+		}
+	}
+});
+```
+
 - Ocultando todas las ventanas modales presentes (**ADVERTENCIA:** no se ejecutarán las llamadas de retorno asociadas):
 
 ```javascript
