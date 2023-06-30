@@ -196,6 +196,7 @@ Modal.show({
 ```javascript
 Modal.show({
 	text: "<img src='images/mountains.png' />",
+	media: true,
 	css: {
 		//El botón de cerrado
 		close: {
