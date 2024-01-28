@@ -207,6 +207,7 @@ const Modal = {
 			transition: all ease .4s;
 			scrollbar-width: 12.5px;
 			scrollbar-color: #C0C0C0 #696969;
+			scroll-behavior: smooth;
 			background-color: ${Modal.options?.css?.front?.backgroundColor?.length ? Modal.options.css.front.backgroundColor : "#FFFFEF"};
 			border: ${Modal.options?.css?.front?.border?.length ? Modal.options.css.front.border : "1px grey solid"};
 			border-radius: ${Modal.options?.css?.front?.borderRadius?.length ? Modal.options.css.front.borderRadius : 0};
@@ -219,7 +220,7 @@ const Modal = {
 			{transform: "scaleY(1)"}
 		], {duration: 400});
 
-		const changes = new ResizeObserver(Modal.resize);
+		const changes = new ResizeObserver(_ => Modal.resize());
 		changes.observe(front);
 
 		return front;
