@@ -191,8 +191,8 @@ const Modal = {
 		front.id = `modalFront-${Modal.options.id.substring(Modal.options.id.indexOf("-") + 1)}`;
 		front.style = `
 			width: max-content;
-			min-width: ${width * (width < 850 ? .4 : .5)}px;
-			max-width: ${width * (width < 850 ? .8 : .7)}px;
+			min-width: ${width * (width < 850 ? .6 : .5)}px !important;
+			max-width: ${width * (width < 850 ? .8 : .7)}px !important;
 			height: max-content;
 			max-height: ${height * (height < 850 ? .75 : .85)}px;
 			display: flex;
@@ -219,12 +219,16 @@ const Modal = {
 			{transform: "scaleY(1)"}
 		], {duration: 400});
 
+		const changes = new ResizeObserver(Modal.resize);
+		changes.observe(front);
+
 		return front;
 	},
 
 	createClose(){
 		const close = document.createElement("span");
 
+		close.classList.add("closeBtn");
 		close.style = `
 			position: fixed;
 			user-select: none;
@@ -350,7 +354,7 @@ const Modal = {
 			back.style.width = `${width}px`;
 			back.style.height = `${height}px`;
 
-			front.style.minWidth = `${config.media ? width * .25 : width * (width < 850 ? .4 : .5)}px`;
+			front.style.minWidth = `${config.media ? width * .25 : width * (width < 850 ? .75 : .5)}px`;
 			front.style.maxWidth = `${config.media ? width * .75 : width * (width < 850 ? .8 : .7)}px`;
 			front.style.maxHeight = `${config.media ? height * .85 : height * (height < 850 ? .75 : .85)}px`;
 
